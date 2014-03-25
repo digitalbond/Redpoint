@@ -28,13 +28,21 @@ The purpose of BACnet-discover-enumerate.nse is to first identify if an IP conne
 Second, if an acknowledgement is received, this script will also attempt to enumerate several BACnet properties on a responsive BACnet device. Again, the device is queried with a pregenerated BACnet message. Successful enumeration uses specially crafted requests, and will not be successful if the BACnet device does not support the property. 
 
 BACnet properties queried by this script are:
+
 1. Vendor ID - A number that corresponds to a registered BACnet Vendor. The script returns the associated vendor name as well.
+
 2. Object Identifier - A number that uniquely identifies the device, and can be used to initiate other BACnet operations against the device. This is a required property for all BACnet devices.
+
 3. Firmware Revision - The revision number of the firmware on the BACnet device.
+
 4. Application Software Revision - The revision number of the software being used for BACnet communication.
+
 5. Object Name - A user defined string that assigns a name to the BACnet device, commonly entered by technicians on commissioning. This is a required property for all BACnet devices.
+
 6. Model Name - The model of the BACnet device
+
 7. Description - A user defined string for describing the device, commonly entered by technicians on commissioning
+
 8. Location - A user defined string for recording the physical location of the device, commonly entered by technicians on commissioning
 
 The Object Identifier is the unique BACnet address of the device. Using the Object-Identifier, it is possible to send a larger number of commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. 
