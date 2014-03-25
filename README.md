@@ -1,22 +1,27 @@
-Redpoint
-========
-
-Digital Bond's ICS Enumeration Tools
+#Redpoint
 
 
-========
-BACnet-discover-enumerate.nse
+####Digital Bond's ICS Enumeration Tools
 
---------
-Authors
---------
+Redpoint is a Digital Bond research project to enumerate ICS applications and devices. 
 
-Stephen Hilt and Michael Toecker
-Digital Bond, Inc
+We use our Redpoint tools in assessments to discover ICS devices and pull information that would be helpful in secondary testing. A portion of those tools will be made available as nmap scripts to the public in this repository.
 
---------
-Purpose and Description
---------
+The Redpoint tools use legitimate protocol or application commands to discover and enumerate devices and applications. There is no effort to exploit or crash anything. However many ICS devices and applications are fragile and can crash or respond in an unexpected way to any unexpected traffic so use with care.
+
+Each script is documented below and available in a .nse file in this repository. 
+
+==
+
+###BACnet-discover-enumerate.nse
+
+
+####Authors
+
+Stephen Hilt and Michael Toecker  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+####Purpose and Description
 
 The purpose of BACnet-discover-enumerate.nse is to first identify if an IP connected devices is running BACnet. This works by querying the device with a pregenerated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement, older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
 
@@ -36,9 +41,8 @@ The Object Identifier is the unique BACnet address of the device. Using the Obje
 
 This script uses a feature added in 2004 to the BACnet specification in order to retrieve the Object Identifier of a device with a single request, and without joining the BACnet network as a foreign device.  (See ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001 for details)
 
---------
-History and Background
---------
+
+####History and Background
 
 From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 
@@ -46,15 +50,9 @@ From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 
 	BACnet is used in building automation and control systems for applications such as heating, ventilating, and air-conditioning control, lighting control, access control, and fire detection systems and their associated equipment. The BACnet protocol provides mechanisms for computerized building automation devices to exchange information, regardless of the particular building service they perform. 
 	
---------
-Change Log
---------
 
-3/25/2012 - Initial Version 
+####Installation
 
--------
-INSTALL
--------
 This script requires NMAP to run. If you do not have nmap download and Install Nmap based off the nmap instructions. 
 	http://nmap.org/download.html
 
@@ -65,9 +63,8 @@ This script requires NMAP to run. If you do not have nmap download and Install N
 	a) After Downloading BACnet-discover-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root
 		sudo mv BACnet-discover-enumerate.nse /usr/share/nmap/scripts
 		
-------------
-USAGE
-------------
+
+####Usage
 
   1) Inside a Termanial Window/Command Prompt use one of the following commands where <hosts> is the target you wish you scan for BACNet
 	a) Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate <host>
@@ -76,9 +73,7 @@ USAGE
 	a)  nmap -sU -Pn -p 47807 -n --script BACnet-discover-enumerate <host>
 
 		
---------
-Notes
---------
+####Notes
 
 The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/BACnet-discover-enumerate.nse 
 
