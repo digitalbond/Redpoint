@@ -1,7 +1,7 @@
 #Redpoint
 
 
-####Digital Bond's ICS Enumeration Tools
+###Digital Bond's ICS Enumeration Tools
 
 Redpoint is a Digital Bond research project to enumerate ICS applications and devices. 
 
@@ -54,9 +54,9 @@ This script uses a feature added in 2004 to the BACnet specification in order to
 
 From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 
-BACnet is a communications protocol for building automation and control networks. It is an ASHRAE, ANSI, and ISO standard[1] protocol. The default port for BACnet traffic is UDP/47808.
+> BACnet is a communications protocol for building automation and control networks. It is an ASHRAE, ANSI, and ISO standard[1] protocol. The default port for BACnet traffic is UDP/47808.
 
-BACnet is used in building automation and control systems for applications such as heating, ventilating, and air-conditioning control, lighting control, access control, and fire detection systems and their associated equipment. The BACnet protocol provides mechanisms for computerized building automation devices to exchange information, regardless of the particular building service they perform. 
+> BACnet is used in building automation and control systems for applications such as heating, ventilating, and air-conditioning control, lighting control, access control, and fire detection systems and their associated equipment. The BACnet protocol provides mechanisms for computerized building automation devices to exchange information, regardless of the particular building service they perform. 
 	
 
 ####Installation
@@ -87,7 +87,7 @@ Inside a Terminal Window/Command Prompt use one of the following commands where 
 
 To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determineif the device is up by doing a -Pn option for full results. 
 
-	nmap -sU -Pn -p 47807 -n --script BACnet-discover-enumerate <host>
+	nmap -sU -Pn -p 47808 -n --script BACnet-discover-enumerate <host>
 
 		
 ####Notes
