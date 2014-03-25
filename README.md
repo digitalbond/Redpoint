@@ -46,9 +46,9 @@ This script uses a feature added in 2004 to the BACnet specification in order to
 
 From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 
-	BACnet is a communications protocol for building automation and control networks. It is an ASHRAE, ANSI, and ISO standard[1] protocol. The default port for BACnet traffic is UDP/47808.
+BACnet is a communications protocol for building automation and control networks. It is an ASHRAE, ANSI, and ISO standard[1] protocol. The default port for BACnet traffic is UDP/47808.
 
-	BACnet is used in building automation and control systems for applications such as heating, ventilating, and air-conditioning control, lighting control, access control, and fire detection systems and their associated equipment. The BACnet protocol provides mechanisms for computerized building automation devices to exchange information, regardless of the particular building service they perform. 
+BACnet is used in building automation and control systems for applications such as heating, ventilating, and air-conditioning control, lighting control, access control, and fire detection systems and their associated equipment. The BACnet protocol provides mechanisms for computerized building automation devices to exchange information, regardless of the particular building service they perform. 
 	
 
 ####Installation
@@ -56,21 +56,30 @@ From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 This script requires NMAP to run. If you do not have nmap download and Install Nmap based off the nmap instructions. 
 	http://nmap.org/download.html
 
- 1) Windows
-	a) After downloading bacnet-discover.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select "Run as Administrator.
-		move BACnet-discover-enumerate.nse C:\Program Files (x86)\Nmap\scripts
- 2) Linux
-	a) After Downloading BACnet-discover-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root
-		sudo mv BACnet-discover-enumerate.nse /usr/share/nmap/scripts
+#####Windows
+
+After downloading bacnet-discover.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move BACnet-discover-enumerate.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading BACnet-discover-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv BACnet-discover-enumerate.nse /usr/share/nmap/scripts
 		
 
 ####Usage
 
-  1) Inside a Termanial Window/Command Prompt use one of the following commands where <hosts> is the target you wish you scan for BACNet
-	a) Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate <host>
-	b) Linux: sudo nmap -sU -p 47808 --script BACnet-discover-enumerate <host> 
-  2) To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determineif the device is up by doing a -Pn option for full results 
-	a)  nmap -sU -Pn -p 47807 -n --script BACnet-discover-enumerate <host>
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet.
+
+	Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate <host>
+	
+	Linux: sudo nmap -sU -p 47808 --script BACnet-discover-enumerate <host> 
+
+To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determineif the device is up by doing a -Pn option for full results. 
+
+	nmap -sU -Pn -p 47807 -n --script BACnet-discover-enumerate <host>
 
 		
 ####Notes
