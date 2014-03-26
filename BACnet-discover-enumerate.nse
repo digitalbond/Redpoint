@@ -28,15 +28,24 @@ http://digitalbond.com
 -- @output
 --47808/udp open  BACNet -- Building Automation and Control Networks
 --| bacnet-discover:
---|
---| Vendor ID: BACnet Stack at SourceForge (260)
---| Instance Number: 260001
---| Firmware: 0.8.2
---| Application Software: 1.0
---| Object Name: SimpleServer
---| Model Name: GNU
---| Description: server
---|_Location: USA
+--|   Vendor ID: BACnet Stack at SourceForge (260)
+--|   Instance Number: 260001
+--|   Firmware: 0.8.2
+--|   Application Software: 1.0
+--|   Object Name: SimpleServer
+--|   Model Name: GNU
+--|   Description: server
+--|_  Location: USA
+--
+-- @xmloutput
+--<elem key="Vendor ID">BACnet Stack at SourceForge (260)</elem>
+--<elem key="Instance Number">260001</elem>
+--<elem key="Firmware">0.8.2</elem>
+--<elem key="Application Software">1.0</elem>
+--<elem key="Object Name">SimpleServer</elem>
+--<elem key="Model Name">GNU</elem>
+--<elem key="Description">server</elem>
+--<elem key="Location">USA</elem>
 
      
 
@@ -890,7 +899,7 @@ end
 -- Many requests require the same parsing, this function is designed to pull that information based off
 -- a standard query parseing.
 --
-function standard_query(socket, type, type_string)
+function standard_query(socket, type)
 
 	-- set the firmware version query data for sending
 	local firmware_query = bin.pack( "H","810a001101040005010c0c023FFFFF192c") 
@@ -940,15 +949,15 @@ function standard_query(socket, type, type_string)
 		if( tresp[13] .. tresp[14] ~= "50") then
 			--collect information by looping thru the packet
 			local result = loop_packet(tresp)
-			return type_string .. ": " .. tostring(result)
+			return tostring(result)
 		-- if it was an error packet
 		else
 			socket:close()
-			return type_string .. ": ERROR \n\t" .. string_resp  
+			return "ERROR \n\t" .. string_resp  
 		end
 			-- else ERROR			
 	else
-		return type_string .. ": ERROR \n\t" .. string_resp 
+		return "ERROR \n\t" .. string_resp 
 	end
 	
 end
@@ -984,7 +993,7 @@ function vendornum_query(socket)
 			value = tresp[35] .. tresp[36]
 		else
 			socket:close()
-			return "Vendor ID: ERROR \n\t" .. string_resp .. to_return 
+			return "ERROR \n\t" .. string_resp
 		end
 		-- if value is 21 (byte 18)
 		if( value == "21" ) then
@@ -992,7 +1001,7 @@ function vendornum_query(socket)
 			local vendornum = tonumber(tresp[37] .. tresp[38], 16)
 			-- look up vendor name from table 
 			local vendorname = vendor_lookup(vendornum)
-			return "Vendor ID: " .. vendorname .. " (" .. vendornum .. ")" 
+			return vendorname .. " (" .. vendornum .. ")" 
 		-- if value is 22 (byte 18)
 		elseif( value == "22" ) then
 			-- convert hex to decimal
@@ -1000,10 +1009,10 @@ function vendornum_query(socket)
 			-- look up vendor name from table
 			local vendorname = vendor_lookup(vendornum)
 			-- set vendor name in the varaible that will be returned when done
-			return  "Vendor ID: " .. vendorname .. " (" .. vendornum .. ")" 
+			return  vendorname .. " (" .. vendornum .. ")" 
 		else
 			-- set return value to an Error if byte 18 was not 21/22
-			return "Vendor ID: ERROR " 
+			return "ERROR" 
 		end
 	end		
 
@@ -1014,8 +1023,6 @@ end
 -- main function
 -- 
 action = function(host, port)
-	--varialbe declaration
-	local to_return = {}
 	--set the first query data for sending
 	local orig_query = bin.pack( "H","810a001101040005010c0c023FFFFF194b" )
 		
@@ -1067,24 +1074,25 @@ action = function(host, port)
 		--else pull the InstanceNumber and move onto the pulling more information
 		--
 		else
+            local to_return = stdnse.output_table()
 			-- set the nmap output for the port and version
 			set_nmap(host, port)
-			-- Instance Number (object number)
-			to_return[2] = "Instance Number: " .. tonumber(tresp[39] .. tresp[40] .. tresp[41] .. tresp[42] .. tresp[43] .. tresp[44], 16) 
 			-- Vendor Number to Name lookup
-			to_return[1] = vendornum_query(sock) 
+			to_return["Vendor ID"] = vendornum_query(sock) 
+			-- Instance Number (object number)
+			to_return["Instance Number"] = tonumber(tresp[39] .. tresp[40] .. tresp[41] .. tresp[42] .. tresp[43] .. tresp[44], 16) 
 			--Firmware Verson
-			to_return[3] = standard_query(sock, "firmware", "Firmware")
+			to_return["Firmware"] = standard_query(sock, "firmware")
 			-- Application Software Version
-			to_return[4] = standard_query(sock, "application", "Application Software")
+			to_return["Application Software"] = standard_query(sock, "application")
 			-- Object Name
-			to_return[5] = standard_query(sock, "object", "Object Name")
+			to_return["Object Name"] = standard_query(sock, "object")
 			-- Model Name
-			to_return[6] = standard_query(sock, "model", "Model Name")
+			to_return["Model Name"] = standard_query(sock, "model")
 			-- Description
-			to_return[7] = standard_query(sock, "description", "Description")
+			to_return["Description"] = standard_query(sock, "description")
 			-- Location
-			to_return[8] = standard_query(sock, "location", "Location")		
+			to_return["Location"] = standard_query(sock, "location")		
 		
 		end
 	else
@@ -1096,6 +1104,6 @@ action = function(host, port)
 	-- close socket
 	sock:close()
 	-- return all information that was found
-	return stdnse.format_output(true, to_return)
+	return to_return
 	
 end
