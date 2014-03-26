@@ -1,11 +1,9 @@
 local bin = require "bin"
-local comm = require "comm"
 local nmap = require "nmap"
 local shortport = require "shortport"
 local stdnse = require "stdnse"
 local string = require "string"
 local table = require "table"
-local nsedebug = require "nsedebug"
 
 description = [[
 Discovers and enumerates BACNet Devices collects device information based off standard requests. In some cases, 
@@ -29,15 +27,24 @@ http://digitalbond.com
 -- @output
 --47808/udp open  BACNet -- Building Automation and Control Networks
 --| bacnet-discover:
---|
---| Vendor ID: BACnet Stack at SourceForge (260)
---| Instance Number: 260001
---| Firmware: 0.8.2
---| Application Software: 1.0
---| Object Name: SimpleServer
---| Model Name: GNU
---| Description: server
---|_Location: USA
+--|   Vendor ID: BACnet Stack at SourceForge (260)
+--|   Instance Number: 260001
+--|   Firmware: 0.8.2
+--|   Application Software: 1.0
+--|   Object Name: SimpleServer
+--|   Model Name: GNU
+--|   Description: server
+--|_  Location: USA
+--
+-- @xmloutput
+--<elem key="Vendor ID">BACnet Stack at SourceForge (260)</elem>
+--<elem key="Instance Number">260001</elem>
+--<elem key="Firmware">0.8.2</elem>
+--<elem key="Application Software">1.0</elem>
+--<elem key="Object Name">SimpleServer</elem>
+--<elem key="Model Name">GNU</elem>
+--<elem key="Description">server</elem>
+--<elem key="Location">USA</elem>
 
      
 
@@ -51,9 +58,7 @@ categories = {"discovery", "intrusive"}
 --
 --
 --
-function portrule(host, port)
-	return port.number == 47808
-end
+portrule = shortport.port_or_service(47808, "bacnet", "udp")
 
 --
 -- Function to determine if a string starts with something
@@ -63,19 +68,6 @@ end
 function string.starts(String,Start)
    return string.sub(String,1,string.len(Start))==Start
 end
-
-function string.ends(String,End)
-   return End=='' or string.sub(String,-string.len(End))==End
-end
-
-function split(s, delimiter)
-    result = {};
-    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
-        table.insert(result, match);
-    end
-    return result;
-end
-
 
 --
 --  Function to look up the Vendor Name based on Vendor ID
@@ -826,53 +818,23 @@ end
 --
 --
 function loop_packet(packet)
-	--variable delcration
-	local value = nil
-	local first_char = nil
-	local second_char = nil
-	local i = 0
-	local info = ""
-	-- read the Length field from the packet data byte 19
-	value = tonumber(packet[37] .. packet[38],16) - 1
+	local info
 	
-	if ( packet[36] < tostring(5) ) then
-		value = packet[36] - 1
-		offset = 39 
+	-- read the Length field from the packet data byte 19
+    local offset
+    -- XXX: What is this checking?
+    local value = string.byte(packet, 18)
+	if ( value % 0x10 < 5 ) then
+		value = value % 0x10 - 1
+		offset = 20 
 	else	
-		offset = 41
+        value = string.byte(packet, 19) - 1
+		offset = 21
 	end
-	value = value * 2
-	while ( i < value) do 
-		-- data byte 20 is the start of the firmware version if field is not 0x75, then use the last number (5) to read size
-		-- read character 1
-		first_char=  packet[offset + i] 
-		i = i + 1
-		--read character 2
-		second_char = packet[offset + i] 
-		i = i + 1
-		-- convert to decimal and add to previous string
-		info = info .. string.format("%c", tonumber(first_char .. second_char, 16)) 
-						
-	end
+    -- unpack a string of length <value>
+    offset, info = bin.unpack("A" .. tostring(value), packet, offset)
 	-- return information that was found in the packet  				
 	return info				
-end
---
---convert the response to a hex character table 
---
---
-function convert_response(response)
-
-	string_resp = stdnse.tohex(response)
-	tresp = {};
-	
-	for i = 1, #string_resp do
-		c = string_resp:sub(i,i)
-		tresp[i] = c
-	end
-	-- return the table 
-	return tresp
-	
 end
 --
 -- function to set the nmap output paramaters
@@ -893,7 +855,7 @@ end
 -- Many requests require the same parsing, this function is designed to pull that information based off
 -- a standard query parseing.
 --
-function standard_query(socket, type, type_string)
+function standard_query(socket, type)
 
 	-- set the firmware version query data for sending
 	local firmware_query = bin.pack( "H","810a001101040005010c0c023FFFFF192c") 
@@ -938,20 +900,20 @@ function standard_query(socket, type, type_string)
 	-- validate valid BACNet Packet	
 	if( string.starts(response, "\x81")) then	
 		-- convert response to character table
-		local tresp = convert_response(response)
+		local pos, value = bin.unpack("C", response, 7)
 		-- verify that the response packet was not an error packet
-		if( tresp[13] .. tresp[14] ~= "50") then
+		if( value ~= 0x50) then
 			--collect information by looping thru the packet
-			local result = loop_packet(tresp)
-			return type_string .. ": " .. tostring(result)
+			local result = loop_packet(response)
+			return tostring(result)
 		-- if it was an error packet
 		else
 			socket:close()
-			return type_string .. ": ERROR \n\t" .. string_resp  
+			return "ERROR " .. stdnse.print_debug(response)
 		end
 			-- else ERROR			
 	else
-		return type_string .. ": ERROR \n\t" .. string_resp 
+		return "ERROR " .. stdnse.print_debug(response)
 	end
 	
 end
@@ -977,36 +939,35 @@ function vendornum_query(socket)
 	end
 	-- validate valid BACNet Packet
 	if( string.starts(response, "\x81")) then
-		-- convert response to hex, then to a char table
-		local tresp = convert_response(response)
-		local value = nil
+		local pos, value = bin.unpack("C", response, 7)
 		--if the vendor query resulted in an error 
-		if( tresp[13] .. tresp[14] ~= "50") then
+		if( value ~= 0x50) then
 			-- read values for byte 18 in the packet data
 			-- this value determines if vendor number is 1 or 2 bytes
-			value = tresp[35] .. tresp[36]
+			pos, value = bin.unpack("C", response, 18)
 		else
 			socket:close()
-			return "Vendor ID: ERROR \n\t" .. string_resp .. to_return 
+			return "ERROR \n\t" .. stdnse.tohex(response)
 		end
 		-- if value is 21 (byte 18)
-		if( value == "21" ) then
+		if( value == 0x21 ) then
 			-- convert hex to decimal
-			local vendornum = tonumber(tresp[37] .. tresp[38], 16)
+			local vendornum = string.byte(response, 19)
 			-- look up vendor name from table 
 			local vendorname = vendor_lookup(vendornum)
-			return "Vendor ID: " .. vendorname .. " (" .. vendornum .. ")" 
+			return vendorname .. " (" .. vendornum .. ")" 
 		-- if value is 22 (byte 18)
-		elseif( value == "22" ) then
+		elseif( value == 0x22 ) then
 			-- convert hex to decimal
-			local vendornum = tonumber(tresp[37] .. tresp[38] .. tresp[39] .. tresp[40], 16)
+			local vendornum
+            pos, vendornum = bin.unpack(">S", response, 19)
 			-- look up vendor name from table
 			local vendorname = vendor_lookup(vendornum)
 			-- set vendor name in the varaible that will be returned when done
-			return  "Vendor ID: " .. vendorname .. " (" .. vendornum .. ")" 
+			return  vendorname .. " (" .. vendornum .. ")" 
 		else
 			-- set return value to an Error if byte 18 was not 21/22
-			return "Vendor ID: ERROR " 
+			return "ERROR" 
 		end
 	end		
 
@@ -1017,8 +978,6 @@ end
 -- main function
 -- 
 action = function(host, port)
-	--varialbe declaration
-	local to_return = {}
 	--set the first query data for sending
 	local orig_query = bin.pack( "H","810a001101040005010c0c023FFFFF194b" )
 		
@@ -1031,8 +990,8 @@ action = function(host, port)
 	if(status == false) then
 		return false, err
 	end
-	-- connect to the remote host on udp port 47808	
-    local constatus, conerr = sock:connect(host, 47808, "udp")
+	-- connect to the remote host
+    local constatus, conerr = sock:connect(host, port)
 	if not constatus then
       stdnse.print_debug(1,
         'Error establishing a UDP connection for %s - %s', host, conerr
@@ -1057,12 +1016,11 @@ action = function(host, port)
 	
 	-- if the response starts with 0x81 then its BACNet
 	if( string.starts(response, "\x81")) then
+		local pos, value = bin.unpack("C", response, 7)
 		
-		-- convert the packet to HEX string
-		local tresp = convert_response(response)
 		--if the first query resulted in an error 
 		--
-		if( tresp[13] .. tresp[14] == "50") then
+		if( value ~= 0x50) then
 			-- set the nmap output for the port and version
 			set_nmap(host, port)
 			-- return that BACNet Error was recieved
@@ -1070,24 +1028,27 @@ action = function(host, port)
 		--else pull the InstanceNumber and move onto the pulling more information
 		--
 		else
+            local to_return = stdnse.output_table()
 			-- set the nmap output for the port and version
 			set_nmap(host, port)
-			-- Instance Number (object number)
-			to_return[2] = "Instance Number: " .. tonumber(tresp[39] .. tresp[40] .. tresp[41] .. tresp[42] .. tresp[43] .. tresp[44], 16) 
 			-- Vendor Number to Name lookup
-			to_return[1] = vendornum_query(sock) 
+			to_return["Vendor ID"] = vendornum_query(sock) 
+			-- Instance Number (object number)
+            local instance_upper, instance
+            pos, instance_upper, instance = bin.unpack("C>S", response, 20)
+			to_return["Instance Number"] = instance_upper * 0x10000 + instance
 			--Firmware Verson
-			to_return[3] = standard_query(sock, "firmware", "Firmware")
+			to_return["Firmware"] = standard_query(sock, "firmware")
 			-- Application Software Version
-			to_return[4] = standard_query(sock, "application", "Application Software")
+			to_return["Application Software"] = standard_query(sock, "application")
 			-- Object Name
-			to_return[5] = standard_query(sock, "object", "Object Name")
+			to_return["Object Name"] = standard_query(sock, "object")
 			-- Model Name
-			to_return[6] = standard_query(sock, "model", "Model Name")
+			to_return["Model Name"] = standard_query(sock, "model")
 			-- Description
-			to_return[7] = standard_query(sock, "description", "Description")
+			to_return["Description"] = standard_query(sock, "description")
 			-- Location
-			to_return[8] = standard_query(sock, "location", "Location")		
+			to_return["Location"] = standard_query(sock, "location")		
 		
 		end
 	else
@@ -1099,6 +1060,6 @@ action = function(host, port)
 	-- close socket
 	sock:close()
 	-- return all information that was found
-	return stdnse.format_output(true, to_return)
+	return to_return
 	
 end
