@@ -1,5 +1,4 @@
 local bin = require "bin"
-local comm = require "comm"
 local nmap = require "nmap"
 local shortport = require "shortport"
 local stdnse = require "stdnse"
@@ -69,19 +68,6 @@ portrule = shortport.port_or_service(47808, "bacnet", "udp")
 function string.starts(String,Start)
    return string.sub(String,1,string.len(Start))==Start
 end
-
-function string.ends(String,End)
-   return End=='' or string.sub(String,-string.len(End))==End
-end
-
-function split(s, delimiter)
-    result = {};
-    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
-        table.insert(result, match);
-    end
-    return result;
-end
-
 
 --
 --  Function to look up the Vendor Name based on Vendor ID
