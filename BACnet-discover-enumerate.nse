@@ -832,53 +832,23 @@ end
 --
 --
 function loop_packet(packet)
-	--variable delcration
-	local value = nil
-	local first_char = nil
-	local second_char = nil
-	local i = 0
-	local info = ""
-	-- read the Length field from the packet data byte 19
-	value = tonumber(packet[37] .. packet[38],16) - 1
+	local info
 	
-	if ( packet[36] < tostring(5) ) then
-		value = packet[36] - 1
-		offset = 39 
+	-- read the Length field from the packet data byte 19
+    local offset
+    -- XXX: What is this checking?
+    local value = string.byte(packet, 18)
+	if ( value % 0x10 < 5 ) then
+		value = value % 0x10 - 1
+		offset = 20 
 	else	
-		offset = 41
+        value = string.byte(packet, 19) - 1
+		offset = 21
 	end
-	value = value * 2
-	while ( i < value) do 
-		-- data byte 20 is the start of the firmware version if field is not 0x75, then use the last number (5) to read size
-		-- read character 1
-		first_char=  packet[offset + i] 
-		i = i + 1
-		--read character 2
-		second_char = packet[offset + i] 
-		i = i + 1
-		-- convert to decimal and add to previous string
-		info = info .. string.format("%c", tonumber(first_char .. second_char, 16)) 
-						
-	end
+    -- unpack a string of length <value>
+    offset, info = bin.unpack("A" .. tostring(value), packet, offset)
 	-- return information that was found in the packet  				
 	return info				
-end
---
---convert the response to a hex character table 
---
---
-function convert_response(response)
-
-	string_resp = stdnse.tohex(response)
-	tresp = {};
-	
-	for i = 1, #string_resp do
-		c = string_resp:sub(i,i)
-		tresp[i] = c
-	end
-	-- return the table 
-	return tresp
-	
 end
 --
 -- function to set the nmap output paramaters
@@ -944,20 +914,20 @@ function standard_query(socket, type)
 	-- validate valid BACNet Packet	
 	if( string.starts(response, "\x81")) then	
 		-- convert response to character table
-		local tresp = convert_response(response)
+		local pos, value = bin.unpack("C", response, 7)
 		-- verify that the response packet was not an error packet
-		if( tresp[13] .. tresp[14] ~= "50") then
+		if( value ~= 0x50) then
 			--collect information by looping thru the packet
-			local result = loop_packet(tresp)
+			local result = loop_packet(response)
 			return tostring(result)
 		-- if it was an error packet
 		else
 			socket:close()
-			return "ERROR \n\t" .. string_resp  
+			return "ERROR " .. stdnse.print_debug(response)
 		end
 			-- else ERROR			
 	else
-		return "ERROR \n\t" .. string_resp 
+		return "ERROR " .. stdnse.print_debug(response)
 	end
 	
 end
@@ -983,29 +953,28 @@ function vendornum_query(socket)
 	end
 	-- validate valid BACNet Packet
 	if( string.starts(response, "\x81")) then
-		-- convert response to hex, then to a char table
-		local tresp = convert_response(response)
-		local value = nil
+		local pos, value = bin.unpack("C", response, 7)
 		--if the vendor query resulted in an error 
-		if( tresp[13] .. tresp[14] ~= "50") then
+		if( value ~= 0x50) then
 			-- read values for byte 18 in the packet data
 			-- this value determines if vendor number is 1 or 2 bytes
-			value = tresp[35] .. tresp[36]
+			pos, value = bin.unpack("C", response, 18)
 		else
 			socket:close()
-			return "ERROR \n\t" .. string_resp
+			return "ERROR \n\t" .. stdnse.tohex(response)
 		end
 		-- if value is 21 (byte 18)
-		if( value == "21" ) then
+		if( value == 0x21 ) then
 			-- convert hex to decimal
-			local vendornum = tonumber(tresp[37] .. tresp[38], 16)
+			local vendornum = string.byte(response, 19)
 			-- look up vendor name from table 
 			local vendorname = vendor_lookup(vendornum)
 			return vendorname .. " (" .. vendornum .. ")" 
 		-- if value is 22 (byte 18)
-		elseif( value == "22" ) then
+		elseif( value == 0x22 ) then
 			-- convert hex to decimal
-			local vendornum = tonumber(tresp[37] .. tresp[38] .. tresp[39] .. tresp[40], 16)
+			local vendornum
+            pos, vendornum = bin.unpack(">S", response, 19)
 			-- look up vendor name from table
 			local vendorname = vendor_lookup(vendornum)
 			-- set vendor name in the varaible that will be returned when done
@@ -1061,12 +1030,11 @@ action = function(host, port)
 	
 	-- if the response starts with 0x81 then its BACNet
 	if( string.starts(response, "\x81")) then
+		local pos, value = bin.unpack("C", response, 7)
 		
-		-- convert the packet to HEX string
-		local tresp = convert_response(response)
 		--if the first query resulted in an error 
 		--
-		if( tresp[13] .. tresp[14] == "50") then
+		if( value ~= 0x50) then
 			-- set the nmap output for the port and version
 			set_nmap(host, port)
 			-- return that BACNet Error was recieved
@@ -1080,7 +1048,9 @@ action = function(host, port)
 			-- Vendor Number to Name lookup
 			to_return["Vendor ID"] = vendornum_query(sock) 
 			-- Instance Number (object number)
-			to_return["Instance Number"] = tonumber(tresp[39] .. tresp[40] .. tresp[41] .. tresp[42] .. tresp[43] .. tresp[44], 16) 
+            local instance_upper, instance
+            pos, instance_upper, instance = bin.unpack("C>S", response, 20)
+			to_return["Instance Number"] = instance_upper * 0x10000 + instance
 			--Firmware Verson
 			to_return["Firmware"] = standard_query(sock, "firmware")
 			-- Application Software Version
