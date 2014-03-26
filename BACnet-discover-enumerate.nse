@@ -5,7 +5,6 @@ local shortport = require "shortport"
 local stdnse = require "stdnse"
 local string = require "string"
 local table = require "table"
-local nsedebug = require "nsedebug"
 
 description = [[
 Discovers and enumerates BACNet Devices collects device information based off standard requests. In some cases, 
@@ -51,9 +50,7 @@ categories = {"discovery", "intrusive"}
 --
 --
 --
-function portrule(host, port)
-	return port.number == 47808
-end
+portrule = shortport.port_or_service(47808, "bacnet", "udp")
 
 --
 -- Function to determine if a string starts with something
