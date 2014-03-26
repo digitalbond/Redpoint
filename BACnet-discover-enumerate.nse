@@ -1028,8 +1028,8 @@ action = function(host, port)
 	if(status == false) then
 		return false, err
 	end
-	-- connect to the remote host on udp port 47808	
-    local constatus, conerr = sock:connect(host, 47808, "udp")
+	-- connect to the remote host
+    local constatus, conerr = sock:connect(host, port)
 	if not constatus then
       stdnse.print_debug(1,
         'Error establishing a UDP connection for %s - %s', host, conerr
