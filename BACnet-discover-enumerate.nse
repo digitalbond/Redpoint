@@ -976,7 +976,7 @@ function vendornum_query(socket)
     elseif( value == 0x22 ) then
       -- convert hex to decimal
       local vendornum
-            pos, vendornum = bin.unpack(">S", response, 19)
+      pos, vendornum = bin.unpack(">S", response, 19)
       -- look up vendor name from table
       local vendorname = vendor_lookup(vendornum)
       -- set vendor name in the varaible that will be returned when done
@@ -1055,7 +1055,7 @@ action = function(host, port)
       to_return["Vendor ID"] = vendornum_query(sock) 
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Vendor ID"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Vendor ID")
+	    stdnse.print_debug(1, "Error packet received for Vendor ID")
 	    to_return["Vendor ID"] = nil
 	  end
 	  
@@ -1068,14 +1068,14 @@ action = function(host, port)
       to_return["Firmware"] = standard_query(sock, "firmware")
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Firmware"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Firmware")
+	    stdnse.print_debug(1, "Error packet received for Firmware")
 	    to_return["Firmware"] = nil
 	  end
 	  
       -- Application Software Version
       to_return["Application Software"] = standard_query(sock, "application")
 	  if ( to_return["Application Software"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Application Software")
+	    stdnse.print_debug(1, "Error packet received for Application Software")
 	    to_return["Application Software"] = nil
 	  end
 	  
@@ -1083,7 +1083,7 @@ action = function(host, port)
       to_return["Object Name"] = standard_query(sock, "object")
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Object Name"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Object Name")
+	    stdnse.print_debug(1, "Error packet received for Object Name")
 	    to_return["Object Name"] = nil
 	  end
 	  
@@ -1091,7 +1091,7 @@ action = function(host, port)
       to_return["Model Name"] = standard_query(sock, "model")
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Model Name"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Model Name")
+	    stdnse.print_debug(1, "Error packet received for Model Name")
 	    to_return["Model Name"] = nil
 	  end
 	  
@@ -1099,7 +1099,7 @@ action = function(host, port)
       to_return["Description"] = standard_query(sock, "description")
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Description"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Description")
+	    stdnse.print_debug(1, "Error packet received for Description")
 	    to_return["Description"] = nil
 	  end
 	  
@@ -1107,7 +1107,7 @@ action = function(host, port)
       to_return["Location"] = standard_query(sock, "location")
 	  -- if the resulting packet was an Error then remove it from the table
 	  if ( to_return["Location"] == "Error") then
-		stdnse.print_debug(1, "Error packet received for Location")
+	    stdnse.print_debug(1, "Error packet received for Location")
 	    to_return["Location"] = nil
 	  end
 	  
