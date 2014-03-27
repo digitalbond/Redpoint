@@ -15,6 +15,7 @@ Each script is documented below and available in a .nse file in this repository.
 
 ###BACnet-discover-enumerate.nse
 
+![BACnet-discover-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/03/BACnet.png)
 
 ####Authors
 
