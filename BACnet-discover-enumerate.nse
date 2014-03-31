@@ -941,7 +941,7 @@ end
 function vendornum_query(socket)
 
   -- set the vendor query data for sending
-  local vendor_query = bin.pack( "H","'810a001101040005010c0c023FFFFF1978")
+  local vendor_query = bin.pack( "H","810a001101040005010c0c023FFFFF1978")
   
   
   --send the vendor information  
