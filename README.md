@@ -5,11 +5,15 @@
 
 Redpoint is a Digital Bond research project to enumerate ICS applications and devices. 
 
-We use our Redpoint tools in assessments to discover ICS devices and pull information that would be helpful in secondary testing. A portion of those tools will be made available as nmap scripts to the public in this repository.
+We use our Redpoint tools in assessments to discover ICS devices and pull information that would be helpful in secondary testing. A portion of those tools will be made available as Nmap NSE scripts to the public in this repository.
 
 The Redpoint tools use legitimate protocol or application commands to discover and enumerate devices and applications. There is no effort to exploit or crash anything. However many ICS devices and applications are fragile and can crash or respond in an unexpected way to any unexpected traffic so use with care.
 
 Each script is documented below and available in a .nse file in this repository. 
+
+* [BACnet-discover-enumerate.nse](https://github.com/digitalbond/Redpoint#bacnet-discover-enumeratense) - Identify and enumerate BACnet devices
+
+* [s7-enumerate.nse](https://github.com/digitalbond/Redpoint/edit/master/README.md#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
 ==
 
@@ -62,7 +66,7 @@ From Wikipedia article on BACnet http://en.wikipedia.org/wiki/BACnet:
 
 ####Installation
 
-This script requires NMAP to run. If you do not have nmap download and Install Nmap based off the nmap instructions. 
+This script requires nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
 	http://nmap.org/download.html
 
 #####Windows
@@ -86,7 +90,7 @@ Inside a Terminal Window/Command Prompt use one of the following commands where 
 	
 	Linux: sudo nmap -sU -p 47808 --script BACnet-discover-enumerate <host> 
 
-To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determineif the device is up by doing a -Pn option for full results. 
+To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determine if the device is up by doing a -Pn option for full results. 
 
 	nmap -sU -Pn -p 47808 -n --script BACnet-discover-enumerate <host>
 
@@ -100,3 +104,86 @@ This script uses the standard BACnet source and destination port of UDP 47808.
 Newer (after February 25, 2004) BACnet devices are required by spec to respond to specific requests that use a 'catchall' object-identifier with their own valid instance number (see ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001).  Older versions of BACnet devices may not respond to this catchall, and will respond with a BACnet error packet instead.
 
 This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
+
+==
+
+###s7-enumerate.nse
+
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+Note: This script is meant to provide the same functionality as PLCScan inside of Nmap. Some of the information that is 
+collected by PLCScan was not ported over to this NSE, this information can be parsed out of the packets that are received.
+
+Thanks to Positive Research, and Dmitry Efanov for creating PLCScan
+
+####Purpose and Description
+
+The purpose of s7-enumerate.nse is to identify and enumerate Siemens SIMATIC S7 PLCs. A S7 is positively identified by querying TCP/102 with a pre-generated COTP and S7COMMS messages. The response messages will determine if it is a S7 PLC and lead to additional enumeration. Note: TCP/102 is used by multiple applications, one being S7COMMS.
+
+Two S7 requests are sent after successful S7 communication has been established.
+
+These requests pull basic hardware, firmware information, and some descriptive information such as plant identification and system name. This information is then returned to Nmap and presented in standard output formats supported by Nmap.  
+
+S7 properties parsed by this script are:
+
+1. Module - A string that represents the identification of the module that is being queried. This identifies the S7 model, e.g. 315, 412, 1200, ...
+
+2. Basic Hardware -  A string that represents the identification of basic hardware that is being queried.
+
+3. Version - A string that represents the identification of the basic hardware version.
+
+4. System Name - A string that represents the system name that was given to the device. This can provide some useful intelligence if the asset owner had implemented a structured naming convention.
+
+5. Module Type - A string that is the module type name of the inserted module.
+
+6. Serial Number - A string that is the serial number of module. This is primarily of interest for inventory purposes.
+
+7. Copyright - A string that is the copyright information. This usually reads "Original Siemens Equipment", but it is possible a third party implementation of the S7 protocol stack could provide additional information. 
+
+8. Plant Identification - A string that represents the plant identification that is configured on the device. This string has rarely been seen in our scanning, but it could provide useful intelligence.
+
+
+####History and Background
+
+From Wikipedia article on SIMATIC http://simple.wikipedia.org/wiki/SIMATIC:
+
+> SIMATIC is the name of an automation system which was developed by the German company Siemens. The automation system controls machines used for industrial production. This system makes it possible for machines to run automatically.
+	
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading s7-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move s7-enumerate.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading BACnet-discover-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv s7-enumerate.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for S7 PLCs.
+
+	Windows: nmap -p 102 --script s7-enumerate <host>
+	
+	Linux: sudo nmap -p 102 --script s7-enumerate <host> 
+
+		
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/s7-enumerate.nse
+
+This script uses the standard S7COMMS destination port of TCP 102. 
+
+
