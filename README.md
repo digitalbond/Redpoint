@@ -13,7 +13,7 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [BACnet-discover-enumerate.nse](https://github.com/digitalbond/Redpoint#bacnet-discover-enumeratense) - Identify and enumerate BACnet devices
 
-* [s7-enumerate.nse](https://github.com/digitalbond/Redpoint/edit/master/README.md#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
+* [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
 ==
 
