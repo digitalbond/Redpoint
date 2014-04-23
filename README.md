@@ -166,7 +166,7 @@ After downloading s7-enumerate.nse you'll need to move it into the NSE Scripts d
 
 #####Linux
 
-After Downloading BACnet-discover-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+After Downloading s7-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
 		
 	sudo mv s7-enumerate.nse /usr/share/nmap/scripts
 		
