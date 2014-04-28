@@ -130,7 +130,7 @@ EtherNet/IP properties parsed by this script are:
 
 2. Product Name - A string that represents a short description of the product/product family, maximum length is 32 chars
 
-3. Serial Number - A six Byte Hexadecimal Number that is stored little Indian 
+3. Serial Number - A six Byte Hexadecimal Number that is stored little Endian 
 
 4. Device Type - Two byte integer that is used to look up Device type. This field is often not used and set to 0.
 
