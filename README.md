@@ -13,6 +13,8 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [BACnet-discover-enumerate.nse](https://github.com/digitalbond/Redpoint#bacnet-discover-enumeratense) - Identify and enumerate BACnet devices
 
+* [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
+
 * [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
 ==
@@ -104,6 +106,81 @@ This script uses the standard BACnet source and destination port of UDP 47808.
 Newer (after February 25, 2004) BACnet devices are required by spec to respond to specific requests that use a 'catchall' object-identifier with their own valid instance number (see ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001).  Older versions of BACnet devices may not respond to this catchall, and will respond with a BACnet error packet instead.
 
 This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
+
+==
+###enip-enumerate.nse
+
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+
+####Purpose and Description
+
+The purpose of enip-enumerate.nse is to identify and enumerate EtherNet/IP devices. Rockwell Automation / Allen Bradley developed the protocol and is the primary maker of these devices, e.g. ControlLogix and MicroLogix, but it is an open standard and a number of vendors offer an EtherNet/IP interface card or solution. 
+
+An EtherNet/IP device is positively identified by querying TCP/44818 with a list Identities Message (0x63). The response messages will determine if it is a EtherNet/IP device and parse the information to enumerate the device. 
+
+The EtherNet/IP Request List Identities pulls basic information about the device known as the Device's "electronic key". Information includes Vendor, Product Name, Serial Number, Device Type, Product Code and Revision Number. Also the script parses the devices configured IP address from the Socket Address Field within the EtherNet/IP frame of the packet.
+
+EtherNet/IP properties parsed by this script are:
+
+1. Vendor - A two Byte integer that is used to look up Vendor Name
+
+2. Product Name - A string that represents a short description of the product/product family, maximum length is 32 chars
+
+3. Serial Number - A six Byte Hexadecimal Number that is stored little Indian 
+
+4. Device Type - Two byte integer that is used to look up Device type. This field is often not used and set to 0.
+
+5. Product Code - The vendor assigned Product Code identifies a particular product within a device type. The script does not have access to the vendor product code tables so the number is displayed.
+
+6. Revision - Two one-byte integers that lists the major and minor revision number of the device 
+
+7. Device IP - Four one-byte integers that represent the device's configured IP address. This address often differs from the IP address scanned by the script.
+
+####History and Background
+
+From Wikipedia article on EtherNet/IP http://en.wikipedia.org/wiki/EtherNet/IP
+
+> EtherNet/IP was developed in the late 1990s by Rockwell Automation as part of Rockwell's industrial Ethernet networking solutions. Rockwell gave EtherNet/IP its moniker and handed it over to ODVA, which now manages the protocol and assures multi-vendor system interoperability by requiring adherence to established standards whenever new products that utilize the protocol are developed today.
+
+>EtherNet/IP is most commonly used in industrial automation control systems, such as for water processing plants, manufacturing facilities and utilities. Several control system vendors have developed programmable automation controllers and I/O capable of communicating via EtherNet/IP.
+	
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move enip-enumerate.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv enip-enumerate.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for EtherNet/IP.
+
+	Windows: nmap -p 44818 --script enip-enumerate <host>
+	
+	Linux: sudo nmap -p 44818 --script enip-enumerate <host> 
+
+		
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/enip-enumerate.nse
+
+This script uses the standard Ethernet/IP destination port of TCP 44818. 
 
 ==
 
