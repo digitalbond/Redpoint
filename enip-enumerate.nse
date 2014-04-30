@@ -1415,7 +1415,7 @@ action = function(host,port)
 	  pos, output["Product Name"] = bin.unpack("A" .. offset , response, 64)
 	  -- unpack the serial number in Hex form
 	  local pos, char1, char2, char3, char4 = bin.unpack("HHHH", response, 59)
-	  -- print it out in little Indian format
+	  -- print it out in little Endian format
 	  output["Serial Number"] = "0x" .. char4 .. char3 .. char2 .. char1
 	  -- device type number
 	  local pos, devnum = bin.unpack("<S", response, 51)
