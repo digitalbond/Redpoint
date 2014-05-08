@@ -1353,7 +1353,7 @@ end
 --  <code>unknown</code>
 -- 
 -- @param host Host that was passed in via nmap
--- @param port port that EtherNet/IP is running on (Default UDP/44818)
+-- @param port port that EtherNet/IP is running on (Default TCP/44818)
 function set_nmap(host, port)
 
   --set port Open
