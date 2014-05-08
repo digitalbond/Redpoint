@@ -109,6 +109,7 @@ This script does not attempt to join a BACnet network as a foreign device, it si
 
 ==
 ###enip-enumerate.nse
+![enip-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/enip.png)
 
 ####Author
 
@@ -185,6 +186,7 @@ This script uses the standard Ethernet/IP destination port of TCP 44818.
 ==
 
 ###s7-enumerate.nse
+![s7-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
 
 ####Author
 
