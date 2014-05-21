@@ -1,4 +1,5 @@
 local bin = require "bin"
+local ipOps = require "ipOps"
 local nmap = require "nmap"
 local shortport = require "shortport"
 local stdnse = require "stdnse"
@@ -1407,14 +1408,12 @@ action = function(host,port)
       local pos, vennum = bin.unpack("<S", response, 49)
       -- look up vendor number and store in output table
       output["Vendor"] = vendor_lookup(vennum) .. " (" .. vennum .. ")"
-      -- determine the offset for the product name (length field)
-      local pos, offset = bin.unpack("C", response, 63)
       -- unpack product name into output table
-      pos, output["Product Name"] = bin.unpack("A" .. offset , response, 64)
-      -- unpack the serial number in Hex form
-      local pos, char1, char2, char3, char4 = bin.unpack("HHHH", response, 59)
-      -- print it out in little Endian format
-      output["Serial Number"] = "0x" .. char4 .. char3 .. char2 .. char1
+      pos, output["Product Name"] = bin.unpack("p", response, 63)
+      -- unpack the serial number
+      local pos, serial = bin.unpack("<I", response, 59)
+      -- print it out in hex format
+      output["Serial Number"] = string.format("%#0.8x", serial)
       -- device type number
       local pos, devnum = bin.unpack("<S", response, 51)
       -- lookup device type based off number, return to output table
@@ -1426,8 +1425,8 @@ action = function(host,port)
       pos, char1, char2 = bin.unpack("CC", response, 55)
       output["Revision"] = char1 .. "." .. char2
       -- Device IP, this could be the same, as the IP scanning, or may be actual IP behind NAT
-      local pos, char1, char2, char3, char4 = bin.unpack("CCCC", response, 37)
-      output["Device IP"] = char1 .. "." .. char2 .. "." .. char3 .. "." .. char4
+      local pos, dword = bin.unpack("<I", response, 37)
+      output["Device IP"] = ipOps.fromdword(dword)
       -- set Nmap output
       set_nmap(host, port)
       -- close socket
