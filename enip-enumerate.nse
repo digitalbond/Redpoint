@@ -6,12 +6,17 @@ local string = require "string"
 local table = require "table"
 
 description = [[
-This NSE script is used to send a EtherNet/IP packet to a remote device that has TCP 44818 open. The script will send a Request Identity Packet
-and once a response is received, it validates that it was a proper response to the command that was sent, and then will parse out the data. Information
-that is parsed includes Vendor ID, Device Type, Product name, Serial Number, Product code, Revision Number, as well as the Device IP.
+This NSE script is used to send a EtherNet/IP packet to a remote device that
+has TCP 44818 open. The script will send a Request Identity Packet and once a
+response is received, it validates that it was a proper response to the command
+that was sent, and then will parse out the data. Information that is parsed
+includes Vendor ID, Device Type, Product name, Serial Number, Product code,
+Revision Number, as well as the Device IP.
 
-This script was written based of information collected by using the the Wireshark dissector for CIP, and EtherNet/IP, The original information was collected
-by running a modified version of the ethernetip.py script ( https://github.com/paperwork/pyenip )
+This script was written based of information collected by using the the
+Wireshark dissector for CIP, and EtherNet/IP, The original information was
+collected by running a modified version of the ethernetip.py script (
+https://github.com/paperwork/pyenip )
 
 http://digitalbond.com
 
