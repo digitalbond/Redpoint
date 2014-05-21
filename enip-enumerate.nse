@@ -8,7 +8,7 @@ local table = require "table"
 description = [[
 This NSE script is used to send a EtherNet/IP packet to a remote device that has TCP 44818 open. The script will send a Request Identity Packet
 and once a response is received, it validates that it was a proper response to the command that was sent, and then will parse out the data. Information
-that is parsed includes Vendor ID, Device Type, Product name, Serial Number, Product code, Revision Number, as well as the Device IP. 
+that is parsed includes Vendor ID, Device Type, Product name, Serial Number, Product code, Revision Number, as well as the Device IP.
 
 This script was written based of information collected by using the the Wireshark dissector for CIP, and EtherNet/IP, The original information was collected
 by running a modified version of the ethernetip.py script ( https://github.com/paperwork/pyenip )
@@ -58,10 +58,10 @@ portrule = shortport.portnumber(44818, "tcp")
 --  Table data from Wireshark dissector ( link to unofficial mirror )
 --  https://github.com/avsej/wireshark/blob/master/epan/dissectors/packet-enip.c
 --  Fetched on 4/19/2014
--- 
+--
 -- @param vennum Vendor number parsed out of the EtherNet/IP packet
 function vendor_lookup(vennum)
-  local vendor_id = { 
+  local vendor_id = {
     [0] = "Reserved",
     [1] = "Rockwell Automation/Allen-Bradley",
     [2] = "Namco Controls Corp.",
@@ -1283,14 +1283,14 @@ function vendor_lookup(vennum)
     [1238] = "Global Engineering Solutions Co.Ltd.",
     [1239] = "ALTE Transportation] = S.L.",
     [1240] = "Penko Engineering B.V."
-   }
-   --return vendor information
-   if(vendor_id[vennum] ~= nil) then
-     return vendor_id[vennum]
-   else
-     return "Unknown Vendor Number"
-   end
-end 
+  }
+  --return vendor information
+  if(vendor_id[vennum] ~= nil) then
+    return vendor_id[vennum]
+  else
+    return "Unknown Vendor Number"
+  end
+end
 
 ---
 --  Function to look up the Device Type based on Device ID Number
@@ -1298,10 +1298,10 @@ end
 --  Table data from Wireshark dissector ( link to unofficial mirror )
 --  https://github.com/avsej/wireshark/blob/master/epan/dissectors/packet-enip.c
 --  Fetched on 4/19/2014
--- 
+--
 -- @param devtype Device ID  number parsed out of the EtherNet/IP packet
 function device_type_lookup(devtype)
-  local device_type = {  
+  local device_type = {
     [0] = "Generic Device (deprecated)",
     [2] = "AC Drive",
     [3] = "Motor Overload",
@@ -1339,19 +1339,19 @@ function device_type_lookup(devtype)
     [44] = "Managed Switch",
     [59] = "ControlNet Physical Layer Component"
 
-   }
-   --return device type information
-   if(device_type[devtype] ~= nil) then
-     return device_type[devtype]
-   else
-     return "Unknown Device Type"
-   end
-end 
+  }
+  --return device type information
+  if(device_type[devtype] ~= nil) then
+    return device_type[devtype]
+  else
+    return "Unknown Device Type"
+  end
+end
 ---
 --  Function to set the nmap output for the host, if a valid EtherNet/IP packet
---  is received then the output will show that the port as EtherNet/IP instead of 
+--  is received then the output will show that the port as EtherNet/IP instead of
 --  <code>unknown</code>
--- 
+--
 -- @param host Host that was passed in via nmap
 -- @param port port that EtherNet/IP is running on (Default TCP/44818)
 function set_nmap(host, port)
@@ -1368,7 +1368,7 @@ end
 --  Action Function that is used to run the NSE. This function will send the initial query to the
 --  host and port that were passed in via nmap. The initial response is parsed to determine if host
 --  is a EtherNet/IP device. If it is then more actions are taken to gather extra information.
--- 
+--
 -- @param host Host that was scanned via nmap
 -- @param port port that was scanned via nmap
 action = function(host,port)
@@ -1386,14 +1386,14 @@ action = function(host,port)
   end
   -- create new try
   try = nmap.new_try(catch)
-  
+
   -- connect to port on host
   try(socket:connect(host, port))
   -- send Req Identity packet
   try(socket:send(enip_req_ident))
   -- receive response
   local rcvstatus, response = socket:receive()
-   if(rcvstatus == false) then
+  if(rcvstatus == false) then
     return false, response
   end
   -- unpack the response command
@@ -1404,44 +1404,44 @@ action = function(host,port)
   if ( command == 0x63) then
     -- if typeid == 0x0c (req ident)
     if( typeid == 0x0c) then
-	
-	  -- vendor number
-	  local pos, vennum = bin.unpack("<S", response, 49)
-	  -- look up vendor number and store in output table
-	  output["Vendor"] = vendor_lookup(vennum) .. " (" .. vennum .. ")"
-	  -- determine the offset for the product name (length field)
-	  local pos, offset = bin.unpack("C", response, 63) 
-	  -- unpack product name into output table
-	  pos, output["Product Name"] = bin.unpack("A" .. offset , response, 64)
-	  -- unpack the serial number in Hex form
-	  local pos, char1, char2, char3, char4 = bin.unpack("HHHH", response, 59)
-	  -- print it out in little Endian format
-	  output["Serial Number"] = "0x" .. char4 .. char3 .. char2 .. char1
-	  -- device type number
-	  local pos, devnum = bin.unpack("<S", response, 51)
-	  -- lookup device type based off number, return to output table
-	  output["Device Type"] = device_type_lookup(devnum) .. " (" .. devnum .. ")"
-	  -- unpack product code as a two byte int
-	  pos, char1 = bin.unpack("S", response, 53)
-	  output["Product Code"] = char1 
-	  -- Revision Nuumber
-	  pos, char1, char2 = bin.unpack("CC", response, 55)
-	  output["Revision"] = char1 .. "." .. char2
-	  -- Device IP, this could be the same, as the IP scanning, or may be actual IP behind NAT
-	  local pos, char1, char2, char3, char4 = bin.unpack("CCCC", response, 37)
-	  output["Device IP"] = char1 .. "." .. char2 .. "." .. char3 .. "." .. char4
+
+      -- vendor number
+      local pos, vennum = bin.unpack("<S", response, 49)
+      -- look up vendor number and store in output table
+      output["Vendor"] = vendor_lookup(vennum) .. " (" .. vennum .. ")"
+      -- determine the offset for the product name (length field)
+      local pos, offset = bin.unpack("C", response, 63)
+      -- unpack product name into output table
+      pos, output["Product Name"] = bin.unpack("A" .. offset , response, 64)
+      -- unpack the serial number in Hex form
+      local pos, char1, char2, char3, char4 = bin.unpack("HHHH", response, 59)
+      -- print it out in little Endian format
+      output["Serial Number"] = "0x" .. char4 .. char3 .. char2 .. char1
+      -- device type number
+      local pos, devnum = bin.unpack("<S", response, 51)
+      -- lookup device type based off number, return to output table
+      output["Device Type"] = device_type_lookup(devnum) .. " (" .. devnum .. ")"
+      -- unpack product code as a two byte int
+      pos, char1 = bin.unpack("S", response, 53)
+      output["Product Code"] = char1
+      -- Revision Nuumber
+      pos, char1, char2 = bin.unpack("CC", response, 55)
+      output["Revision"] = char1 .. "." .. char2
+      -- Device IP, this could be the same, as the IP scanning, or may be actual IP behind NAT
+      local pos, char1, char2, char3, char4 = bin.unpack("CCCC", response, 37)
+      output["Device IP"] = char1 .. "." .. char2 .. "." .. char3 .. "." .. char4
       -- set Nmap output
-	  set_nmap(host, port)
-	  -- close socket
-	  socket:close()
-	  -- return output table to Nmap
+      set_nmap(host, port)
+      -- close socket
+      socket:close()
+      -- return output table to Nmap
       return output
-	end
+    end
   else
     socket:close()
     return nil
   end
-  
-  
+
+
 
 end
