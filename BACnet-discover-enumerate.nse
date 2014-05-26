@@ -6,13 +6,14 @@ local string = require "string"
 local table = require "table"
 
 description = [[
-Discovers and enumerates BACNet Devices collects device information based off standard requests. In some cases,
-devices may not strictly follow the specifications, or may comply with older versions of the
-specifications, and will result in a BACNET error response. Presence of this error positively
+Discovers and enumerates BACNet Devices collects device information based off
+standard requests. In some cases, devices may not strictly follow the
+specifications, or may comply with older versions of the specifications, and
+will result in a BACNET error response. Presence of this error positively
 identifies the device as a BACNet device, but no enumeration is possible.
 
-Note: Requests and responses are via UDP 47808, ensure scanner will receive UDP 47808 source
-and destination responses.
+Note: Requests and responses are via UDP 47808, ensure scanner will receive UDP
+47808 source and destination responses.
 
 http://digitalbond.com
 
@@ -905,7 +906,7 @@ function standard_query(socket, type)
   --try to pull the  information
   local status, result = socket:send(query)
   if(result == false) then
-    return false, response
+    return false, result
   end
   -- receive packet from response
   local rcvstatus, response = socket:receive()
@@ -947,7 +948,7 @@ function vendornum_query(socket)
   --send the vendor information
   local status, result = socket:send(vendor_query)
   if(result == false) then
-    return false, response
+    return false, result
   end
   -- receive vendor information packet
   local rcvstatus, response = socket:receive()
@@ -1002,11 +1003,11 @@ action = function(host, port)
   local to_return = nil
 
   -- create new socket
-  sock = nmap.new_socket()
+  local sock = nmap.new_socket()
   -- Bind to port for niceness with BACNet this may need to be commented out if
   -- scanning more than one host at a time, may fix some issues seen on Windows
   --
-  status, err = sock:bind(nil, 47808)
+  local status, err = sock:bind(nil, 47808)
   if(status == false) then
     return false, err
   end
@@ -1031,7 +1032,7 @@ action = function(host, port)
   -- receive response
   local rcvstatus, response = sock:receive()
   if(rcvstatus == false) then
-    return false, result
+    return false, response
   end
 
   -- if the response starts with 0x81 then its BACNet
