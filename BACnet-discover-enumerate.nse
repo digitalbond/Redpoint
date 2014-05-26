@@ -6,12 +6,12 @@ local string = require "string"
 local table = require "table"
 
 description = [[
-Discovers and enumerates BACNet Devices collects device information based off standard requests. In some cases, 
-devices may not strictly follow the specifications, or may comply with older versions of the 
-specifications, and will result in a BACNET error response. Presence of this error positively 
-identifies the device as a BACNet device, but no enumeration is possible. 
+Discovers and enumerates BACNet Devices collects device information based off standard requests. In some cases,
+devices may not strictly follow the specifications, or may comply with older versions of the
+specifications, and will result in a BACNET error response. Presence of this error positively
+identifies the device as a BACNet device, but no enumeration is possible.
 
-Note: Requests and responses are via UDP 47808, ensure scanner will receive UDP 47808 source 
+Note: Requests and responses are via UDP 47808, ensure scanner will receive UDP 47808 source
 and destination responses.
 
 http://digitalbond.com
@@ -46,7 +46,7 @@ http://digitalbond.com
 --<elem key="Description">server</elem>
 --<elem key="Location">USA</elem>
 
-     
+
 
 author = "Stephen Hilt && Michael Toecker (Digital Bond)"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
@@ -63,14 +63,14 @@ portrule = shortport.port_or_service(47808, "bacnet", "udp")
 
 ---
 -- Function to determine if a string starts with the parameter that is passed in
--- 
+--
 -- First argument is the string to be evaluated, the second argument is
--- the character(s) to be tested if the string starts with this argument. Uses Lua 
--- <code>string.sub</code> and <code>string.len</code> 
+-- the character(s) to be tested if the string starts with this argument. Uses Lua
+-- <code>string.sub</code> and <code>string.len</code>
 -- @param String String to be passed in.
 -- @param Start The char you want to test to see the string starts with.
 function string.starts(String,Start)
-   return string.sub(String,1,string.len(Start))==Start
+  return string.sub(String,1,string.len(Start))==Start
 end
 
 ---
@@ -78,10 +78,10 @@ end
 --    Returns "Unknown Vendor Number" if Vendor ID not recognized
 --  Table data from http://www.bacnet.org/VendorID/BACnet%20Vendor%20IDs.htm
 --  Fetched on 3/18/2014
--- 
+--
 -- @param vennum Vendor number parsed out of the BACNet packet
 function vendor_lookup(vennum)
-  local vendor_id = { 
+  local vendor_id = {
     [0] = "ASHRAE",
     [1] = "NIST",
     [2] = "The Trane Company",
@@ -815,41 +815,41 @@ function vendor_lookup(vennum)
   else
     return "Unknown Vendor Number"
   end
-end 
+end
 
 ---
 --  Function to lookup the length of the Field to be used for Vendor ID, Firmware
 --  Object Name, Software Version, and Location. It will then return the Value
---  that is stored inside the packet for this information as a String Value. 
---  The field is located in the 18th byte of the data field of a valid packet. 
---  Depending on this field the information will be stored in field 20 + length 
---  or in field 22 + length. 
--- 
+--  that is stored inside the packet for this information as a String Value.
+--  The field is located in the 18th byte of the data field of a valid packet.
+--  Depending on this field the information will be stored in field 20 + length
+--  or in field 22 + length.
+--
 -- @param packet The packet that was received and is ready to be parsed
 function field_size(packet)
   local info
-  
+
   -- read the Length field from the packet data byte 18
-    local offset
-    -- Verify the field from byte 18 to determine if the vendor number is one byte or two bytes?
-    local value = string.byte(packet, 18)
+  local offset
+  -- Verify the field from byte 18 to determine if the vendor number is one byte or two bytes?
+  local value = string.byte(packet, 18)
   if ( value % 0x10 < 5 ) then
     value = value % 0x10 - 1
-    offset = 20 
-  else  
+    offset = 20
+  else
     value = string.byte(packet, 19) - 1
     offset = 21
   end
-   -- unpack a string of length <value>
-    offset, info = bin.unpack("A" .. tostring(value), packet, offset)
-  -- return information that was found in the packet          
-  return info        
+  -- unpack a string of length <value>
+  offset, info = bin.unpack("A" .. tostring(value), packet, offset)
+  -- return information that was found in the packet
+  return info
 end
 ---
 --  Function to set the nmap output for the host, if a valid BACNet packet
---  is received then the output will show that the port is open instead of 
+--  is received then the output will show that the port is open instead of
 --  <code>open|filtered</code>
--- 
+--
 -- @param host Host that was passed in via nmap
 -- @param port port that BACNet is running on (Default UDP/47808)
 function set_nmap(host, port)
@@ -866,14 +866,14 @@ end
 ---
 --  Function to send a query to the discovered BACNet devices. This will pull extra
 --  information to help identify the device. Information such as firmware, application software
---  object name, description, and location parameters configured inside of the device. 
--- 
+--  object name, description, and location parameters configured inside of the device.
+--
 -- @param socket The socket that was created in the action function
 -- @param type Type is the type of packet to send, this can be firmware, application, object, description, or location
 function standard_query(socket, type)
 
   -- set the firmware version query data for sending
-  local firmware_query = bin.pack( "H","810a001101040005010c0c023FFFFF192c") 
+  local firmware_query = bin.pack( "H","810a001101040005010c0c023FFFFF192c")
   -- set the application version query data for sending
   local appsoft_query = bin.pack( "H","810a001101040005010c0c023FFFFF190c")
   -- set the object name query data for sending
@@ -884,8 +884,8 @@ function standard_query(socket, type)
   local desc_query = bin.pack("H","810a001101040005010c0c023FFFFF191c")
   -- set the location name query data for sending
   local location_query = bin.pack("H","810a001101040005010c0c023FFFFF193A")
-  local query 
-  
+  local query
+
   --
   -- determine what type of packet to send
   if (type == "firmware") then
@@ -901,8 +901,8 @@ function standard_query(socket, type)
   elseif (type == "location") then
     query = location_query
   end
-  
-  --try to pull the  information  
+
+  --try to pull the  information
   local status, result = socket:send(query)
   if(result == false) then
     return false, response
@@ -912,8 +912,8 @@ function standard_query(socket, type)
   if(rcvstatus == false) then
     return false, response
   end
-  -- validate valid BACNet Packet  
-  if( string.starts(response, "\x81")) then  
+  -- validate valid BACNet Packet
+  if( string.starts(response, "\x81")) then
     -- Lookup byte 7 (pakcet type)
     local pos, value = bin.unpack("C", response, 7)
     -- verify that the response packet was not an error packet
@@ -921,30 +921,30 @@ function standard_query(socket, type)
       --collect information by looping thru the packet
       local result = field_size(response)
       return tostring(result)
-    -- if it was an error packet, set the string to error for later purposes 
+      -- if it was an error packet, set the string to error for later purposes
     else
-      return "Error" 
+      return "Error"
     end
-  -- else ERROR      
+    -- else ERROR
   else
     stdnse.print_debug(1,"Error Not BACNet Packet")
-	return nil
+    return nil
   end
-  
+
 end
 ---
 --  Function to send a query to the discovered BACNet devices. This function queries extra
---  information to help identify the device. Vendor ID query is sent with this 
---  function and the Vendor ID number is parsed out of the packet. 
--- 
+--  information to help identify the device. Vendor ID query is sent with this
+--  function and the Vendor ID number is parsed out of the packet.
+--
 -- @param socket The socket that was created in the action function
 function vendornum_query(socket)
 
   -- set the vendor query data for sending
   local vendor_query = bin.pack( "H","810a001101040005010c0c023FFFFF1978")
-  
-  
-  --send the vendor information  
+
+
+  --send the vendor information
   local status, result = socket:send(vendor_query)
   if(result == false) then
     return false, response
@@ -957,7 +957,7 @@ function vendornum_query(socket)
   -- validate valid BACNet Packet
   if( string.starts(response, "\x81")) then
     local pos, value = bin.unpack("C", response, 7)
-    --if the vendor query resulted in an error 
+    --if the vendor query resulted in an error
     if( value ~= 0x50) then
       -- read values for byte 18 in the packet data
       -- this value determines if vendor number is 1 or 2 bytes
@@ -969,10 +969,10 @@ function vendornum_query(socket)
     if( value == 0x21 ) then
       -- convert hex to decimal
       local vendornum = string.byte(response, 19)
-      -- look up vendor name from table 
+      -- look up vendor name from table
       local vendorname = vendor_lookup(vendornum)
-      return vendorname .. " (" .. vendornum .. ")" 
-    -- if value is 22 (byte 18)
+      return vendorname .. " (" .. vendornum .. ")"
+      -- if value is 22 (byte 18)
     elseif( value == 0x22 ) then
       -- convert hex to decimal
       local vendornum
@@ -980,12 +980,12 @@ function vendornum_query(socket)
       -- look up vendor name from table
       local vendorname = vendor_lookup(vendornum)
       -- set vendor name in the varaible that will be returned when done
-      return  vendorname .. " (" .. vendornum .. ")" 
+      return  vendorname .. " (" .. vendornum .. ")"
     else
       -- set return value to an Error if byte 18 was not 21/22
-      return "ERROR" 
+      return "ERROR"
     end
-  end    
+  end
 
 end
 
@@ -993,125 +993,125 @@ end
 --  Action Function that is used to run the NSE. This function will send the initial query to the
 --  host and port that were passed in via nmap. The initial response is parsed to determine if host
 --  is a BACNet device. If it is then more actions are taken to gather extra information.
--- 
+--
 -- @param host Host that was scanned via nmap
 -- @param port port that was scanned via nmap
 action = function(host, port)
   --set the first query data for sending
   local orig_query = bin.pack( "H","810a001101040005010c0c023FFFFF194b" )
-  local to_return = nil  
-  
+  local to_return = nil
+
   -- create new socket
   sock = nmap.new_socket()
-    -- Bind to port for niceness with BACNet this may need to be commented out if 
-  -- scanning more than one host at a time, may fix some issues seen on Windows 
+  -- Bind to port for niceness with BACNet this may need to be commented out if
+  -- scanning more than one host at a time, may fix some issues seen on Windows
   --
   status, err = sock:bind(nil, 47808)
   if(status == false) then
     return false, err
   end
   -- connect to the remote host
-    local constatus, conerr = sock:connect(host, port)
+  local constatus, conerr = sock:connect(host, port)
   if not constatus then
-      stdnse.print_debug(1,
-        'Error establishing a UDP connection for %s - %s', host, conerr
+    stdnse.print_debug(1,
+      'Error establishing a UDP connection for %s - %s', host, conerr
       )
-      return nil
-    end
+    return nil
+  end
   -- send the original query to see if it is a valid BACNet Device
   local sendstatus, senderr = sock:send(orig_query)
   if not sendstatus then
     stdnse.print_debug(1,
-    'Error sending BACNet request to %s:%d - %s',
-    host.ip, port.number,  senderr
-    )
+      'Error sending BACNet request to %s:%d - %s',
+      host.ip, port.number,  senderr
+      )
     return nil
   end
-  
-  -- receive response 
-    local rcvstatus, response = sock:receive()
+
+  -- receive response
+  local rcvstatus, response = sock:receive()
   if(rcvstatus == false) then
     return false, result
   end
-  
+
   -- if the response starts with 0x81 then its BACNet
   if( string.starts(response, "\x81")) then
     local pos, value = bin.unpack("C", response, 7)
-    --if the first query resulted in an error 
+    --if the first query resulted in an error
     --
     if( value == 0x50) then
       -- set the nmap output for the port and version
       set_nmap(host, port)
       -- return that BACNet Error was received
-       to_return = "\nBACNet ADPU Type: Error (5) \n\t" .. stdnse.tohex(response)
-    --else pull the InstanceNumber and move onto the pulling more information
-    --
+      to_return = "\nBACNet ADPU Type: Error (5) \n\t" .. stdnse.tohex(response)
+      --else pull the InstanceNumber and move onto the pulling more information
+      --
     else
-            to_return = stdnse.output_table()
+      to_return = stdnse.output_table()
       -- set the nmap output for the port and version
       set_nmap(host, port)
-	  
+
       -- Vendor Number to Name lookup
-      to_return["Vendor ID"] = vendornum_query(sock) 
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Vendor ID"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Vendor ID")
-	    to_return["Vendor ID"] = nil
-	  end
-	  
+      to_return["Vendor ID"] = vendornum_query(sock)
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Vendor ID"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Vendor ID")
+        to_return["Vendor ID"] = nil
+      end
+
       -- Instance Number (object number)
       local instance_upper, instance
       pos, instance_upper, instance = bin.unpack("C>S", response, 20)
       to_return["Object-identifier"] = instance_upper * 0x10000 + instance
-	  
+
       --Firmware Verson
       to_return["Firmware"] = standard_query(sock, "firmware")
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Firmware"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Firmware")
-	    to_return["Firmware"] = nil
-	  end
-	  
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Firmware"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Firmware")
+        to_return["Firmware"] = nil
+      end
+
       -- Application Software Version
       to_return["Application Software"] = standard_query(sock, "application")
-	  if ( to_return["Application Software"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Application Software")
-	    to_return["Application Software"] = nil
-	  end
-	  
+      if ( to_return["Application Software"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Application Software")
+        to_return["Application Software"] = nil
+      end
+
       -- Object Name
       to_return["Object Name"] = standard_query(sock, "object")
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Object Name"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Object Name")
-	    to_return["Object Name"] = nil
-	  end
-	  
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Object Name"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Object Name")
+        to_return["Object Name"] = nil
+      end
+
       -- Model Name
       to_return["Model Name"] = standard_query(sock, "model")
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Model Name"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Model Name")
-	    to_return["Model Name"] = nil
-	  end
-	  
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Model Name"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Model Name")
+        to_return["Model Name"] = nil
+      end
+
       -- Description
       to_return["Description"] = standard_query(sock, "description")
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Description"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Description")
-	    to_return["Description"] = nil
-	  end
-	  
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Description"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Description")
+        to_return["Description"] = nil
+      end
+
       -- Location
       to_return["Location"] = standard_query(sock, "location")
-	  -- if the resulting packet was an Error then remove it from the table
-	  if ( to_return["Location"] == "Error") then
-	    stdnse.print_debug(1, "Error packet received for Location")
-	    to_return["Location"] = nil
-	  end
-	  
-    
+      -- if the resulting packet was an Error then remove it from the table
+      if ( to_return["Location"] == "Error") then
+        stdnse.print_debug(1, "Error packet received for Location")
+        to_return["Location"] = nil
+      end
+
+
     end
   else
     -- return nothing, no BACNet was detected
@@ -1123,5 +1123,5 @@ action = function(host, port)
   sock:close()
   -- return all information that was found
   return to_return
-  
+
 end
