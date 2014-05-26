@@ -901,13 +901,15 @@ function standard_query(socket, type)
 
   --try to pull the  information
   local status, result = socket:send(query)
-  if(result == false) then
-    return false, result
+  if(status == false) then
+    stdnse.print_debug(1, "Socket error sending query: %s", result)
+    return nil
   end
   -- receive packet from response
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
-    return false, response
+    stdnse.print_debug(1, "Socket error receiving: %s", response)
+    return nil
   end
   -- validate valid BACNet Packet
   if( string.starts(response, "\x81")) then
@@ -920,11 +922,12 @@ function standard_query(socket, type)
       return tostring(result)
       -- if it was an error packet, set the string to error for later purposes
     else
-      return "Error"
+      stdnse.print_debug(1, "Error receiving: BACNet Error")
+      return nil
     end
     -- else ERROR
   else
-    stdnse.print_debug(1,"Error Not BACNet Packet")
+    stdnse.print_debug(1, "Error receiving Vendor ID: Invalid BACNet packet")
     return nil
   end
 
@@ -1061,51 +1064,21 @@ action = function(host, port)
 
       --Firmware Verson
       to_return["Firmware"] = standard_query(sock, "firmware")
-      -- if the resulting packet was an Error then remove it from the table
-      if ( to_return["Firmware"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Firmware")
-        to_return["Firmware"] = nil
-      end
 
       -- Application Software Version
       to_return["Application Software"] = standard_query(sock, "application")
-      if ( to_return["Application Software"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Application Software")
-        to_return["Application Software"] = nil
-      end
 
       -- Object Name
       to_return["Object Name"] = standard_query(sock, "object")
-      -- if the resulting packet was an Error then remove it from the table
-      if ( to_return["Object Name"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Object Name")
-        to_return["Object Name"] = nil
-      end
 
       -- Model Name
       to_return["Model Name"] = standard_query(sock, "model")
-      -- if the resulting packet was an Error then remove it from the table
-      if ( to_return["Model Name"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Model Name")
-        to_return["Model Name"] = nil
-      end
 
       -- Description
       to_return["Description"] = standard_query(sock, "description")
-      -- if the resulting packet was an Error then remove it from the table
-      if ( to_return["Description"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Description")
-        to_return["Description"] = nil
-      end
 
       -- Location
       to_return["Location"] = standard_query(sock, "location")
-      -- if the resulting packet was an Error then remove it from the table
-      if ( to_return["Location"] == "Error") then
-        stdnse.print_debug(1, "Error packet received for Location")
-        to_return["Location"] = nil
-      end
-
 
     end
   else
