@@ -1006,7 +1006,8 @@ action = function(host, port)
   --
   local status, err = sock:bind(nil, 47808)
   if(status == false) then
-    return false, err
+    stdnse.print_debug(1,
+      "Couldn't bind to 47808/udp. Continuing anyway, results may vary")
   end
   -- connect to the remote host
   local constatus, conerr = sock:connect(host, port)
