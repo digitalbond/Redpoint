@@ -1030,7 +1030,8 @@ action = function(host, port)
   -- receive response
   local rcvstatus, response = sock:receive()
   if(rcvstatus == false) then
-    return false, response
+    stdnse.print_debug(1, "Receive error: %s", response)
+    return nil
   end
 
   -- if the response starts with 0x81 then its BACNet
