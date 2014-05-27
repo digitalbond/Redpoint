@@ -81,12 +81,12 @@ end
 -- @param socket the socket that was created in Action.
 -- @param query the specific query that you want to send/receive on.
 function send_receive(socket, query)
-  local sendstatus, senderr = sock:send(query)
+  local sendstatus, senderr = socket:send(query)
   if(sendstatus == false) then
     return "Error Sending S7COMMS"
   end
   -- receive response
-  local rcvstatus,response = sock:receive()
+  local rcvstatus,response = socket:receive()
   if(rcvstatus == false) then
     return "Error Reading S7COMMS"
   end
@@ -117,10 +117,9 @@ function parse_response(response, host, port, output)
     -- reset value to nothing previous reads loop before.
     value = ""
     -- parse the information for what type of PLC (eg S7 312)
-    local pos, char1,char2,char3,char4,char5,char6 = bin.unpack("AAAAAA", response,46)
-    value = char1.. char2 .. char3 .. char4 .. char5 .. char6
+    local pos
+    pos, value = bin.unpack("A6", response,46)
     -- if the value string byte, position 1, is equal to zero (no PLC type was detected in Basic Hardware)
-    stdnse.print_debug(1, string.byte(value,1))
     if( string.byte(value,1) == 0) then
       value = "S7"
     end
@@ -229,7 +228,7 @@ action = function(host,port)
   -- output table for NMAP
   local output = stdnse.output_table()
   -- create socket for communications
-  sock = nmap.new_socket()
+  local sock = nmap.new_socket()
   -- connect to host
   local constatus,conerr = sock:connect(host,port)
   if not constatus then
