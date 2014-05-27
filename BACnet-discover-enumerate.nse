@@ -4,6 +4,7 @@ local shortport = require "shortport"
 local stdnse = require "stdnse"
 local string = require "string"
 local table = require "table"
+local unicode = require "unicode"
 
 description = [[
 Discovers and enumerates BACNet Devices collects device information based off
@@ -832,15 +833,21 @@ function field_size(packet)
   local value = string.byte(packet, 18)
   if ( value % 0x10 < 5 ) then
     value = value % 0x10 - 1
-    offset = 20
+    offset = 19
   else
     value = string.byte(packet, 19) - 1
-    offset = 21
+    offset = 20
   end
   -- unpack a string of length <value>
-  offset, info = bin.unpack("A" .. tostring(value), packet, offset)
+  offset, charset, info = bin.unpack("CA" .. tostring(value), packet, offset)
   -- return information that was found in the packet
-  return info
+  if charset == 0 then -- UTF-8
+    return info
+  elseif charset == 4 then -- UCS-2 big-endian
+    return unicode.transcode(info, unicode.utf16_dec, unicode.utf8_enc, true, nil)
+  else -- TODO: other encodings not supported by unicode.lua
+    return info
+  end
 end
 ---
 --  Function to set the nmap output for the host, if a valid BACNet packet
@@ -918,8 +925,7 @@ function standard_query(socket, type)
     -- verify that the response packet was not an error packet
     if( value ~= 0x50) then
       --collect information by looping thru the packet
-      local result = field_size(response)
-      return tostring(result)
+      return field_size(response)
       -- if it was an error packet, set the string to error for later purposes
     else
       stdnse.print_debug(1, "Error receiving: BACNet Error")
