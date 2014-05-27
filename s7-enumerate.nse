@@ -10,10 +10,12 @@ local table = require "table"
 
 
 description = [[
-Enumerates Siemens S7 PLC Devices and collects their device information. This NSE is based off PLCScan
-that was developed by Positive Research and Scadastrangelove (https://code.google.com/p/plcscan/). This
-script is meant to provide the same functionality as PLCScan inside of NMAP. Some of the information that is
-collected by PLCScan was not ported over to this NSE, this information can be parsed out of the packets that are received.
+Enumerates Siemens S7 PLC Devices and collects their device information. This
+NSE is based off PLCScan that was developed by Positive Research and
+Scadastrangelove (https://code.google.com/p/plcscan/). This script is meant to
+provide the same functionality as PLCScan inside of NMAP. Some of the
+information that is collected by PLCScan was not ported over to this NSE, this
+information can be parsed out of the packets that are received.
 
 Thanks to Positive Research, and Dmitry Efanov for creating PLCScan
 ]]
