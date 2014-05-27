@@ -53,23 +53,7 @@ categories = {"discovery","intrusive"}
 
 
 -- port rule for devices running on TCP/102
-portrule = shortport.portnumber(102,"tcp")
-
----
--- Function return the number of keys in a table
---
--- With no good way to read the length of a table in Lua this will
--- loop through the keys in table and increment a counter, and return
--- the number of keys that was discovered via this method. This method
--- was used because of errors using <code>table.getn(table)</code> was
--- causing with nil tables and tables with the key length of 1.
---
--- @param T A table to retrieve the length of (keys).
-function tablelength(T)
-  local count = 0
-  for _ in pairs(T) do count = count + 1 end
-  return count
-end
+portrule = shortport.port_or_service(102, "iso-tsap", "tcp")
 
 ---
 -- Function to send and receive the S7COMMS Packet
@@ -113,18 +97,7 @@ function parse_response(response, host, port, output)
   local offset = 0
   -- if the protocol ID is 0x32
   if (value == 0x32) then
-
-    -- reset value to nothing previous reads loop before.
-    value = ""
-    -- parse the information for what type of PLC (eg S7 312)
     local pos
-    pos, value = bin.unpack("A6", response,46)
-    -- if the value string byte, position 1, is equal to zero (no PLC type was detected in Basic Hardware)
-    if( string.byte(value,1) == 0) then
-      value = "S7"
-    end
-    -- set nmap output
-    set_nmap(host, port, value)
     -- unpack the module information
     pos, output["Module"] = bin.unpack("z", response, 44)
     -- unpack the basic hardware information
@@ -194,11 +167,13 @@ end
 --
 -- @param host Host that was passed in via nmap
 -- @param port port that S7COMMS is running on
-function set_nmap(host, port, type)
+function set_nmap(host, port)
   --set port Open
   port.state = "open"
   -- set that detected an Siemens S7
-  port.version.name = "Siemens " .. type .. " PLC"
+  port.version.name = "iso-tsap"
+  port.version.devicetype = "specialized"
+  port.version.product = "Siemens S7 PLC"
   nmap.set_port_version(host, port)
   nmap.set_port_state(host, port, "open")
 
@@ -312,12 +287,10 @@ action = function(host,port)
   end
   -- close the socket
   sock:close()
-  -- for some devices we receive valid packets, just nothing
-  -- was parsed out, so only "version" will be in the table
-  -- in that case change the nmap output, and remove the table.
-  if(tablelength(output) == 1) then
-    set_nmap(host, port, "S7")
-    output = nil
+  
+  -- If we parsed anything, then set the version info for Nmap
+  if #output > 0 then
+    set_nmap(host, port)
   end
   -- return output to NMAP
   return output
