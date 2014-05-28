@@ -13,7 +13,7 @@ description = [[
 Enumerates Siemens S7 PLC Devices and collects their device information. This
 NSE is based off PLCScan that was developed by Positive Research and
 Scadastrangelove (https://code.google.com/p/plcscan/). This script is meant to
-provide the same functionality as PLCScan inside of NMAP. Some of the
+provide the same functionality as PLCScan inside of Nmap. Some of the
 information that is collected by PLCScan was not ported over to this NSE, this
 information can be parsed out of the packets that are received.
 
@@ -85,9 +85,9 @@ end
 -- the second argument is the query to be sent, this is passed in and is created
 -- inside of the main action.
 -- @param response Packet response that was received from S7 host.
--- @param host The host hat was passed in via NMAP, this is to change output of host/port
--- @param port The port that was passed in via NMAP, this is to change output of host/port
--- @param output Table used for output for return to NMAP
+-- @param host The host hat was passed in via Nmap, this is to change output of host/port
+-- @param port The port that was passed in via Nmap, this is to change output of host/port
+-- @param output Table used for output for return to Nmap
 function parse_response(response, host, port, output)
   -- unpack the protocol ID
   local pos, value = bin.unpack("C", response, 8)
@@ -123,7 +123,7 @@ end
 -- the second argument is the query to be sent, this is passed in and is created
 -- inside of the main action.
 -- @param response Packet response that was received from S7 host.
--- @param output Table used for output for return to NMAP
+-- @param output Table used for output for return to Nmap
 function second_parse_response(response, output)
   local offset = 0
   -- unpack the protocol ID
@@ -200,7 +200,7 @@ action = function(host,port)
   local second_SZL_Request = bin.pack("H","0300002102f080320700000000000800080001120411440100ff090004001c0001")
   -- response is used to collect the packet responses
   local response
-  -- output table for NMAP
+  -- output table for Nmap
   local output = stdnse.output_table()
   -- create socket for communications
   local sock = nmap.new_socket()
@@ -292,7 +292,7 @@ action = function(host,port)
   if #output > 0 then
     set_nmap(host, port)
   end
-  -- return output to NMAP
+  -- return output to Nmap
   return output
 
 end
