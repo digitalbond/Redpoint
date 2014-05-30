@@ -56,7 +56,7 @@ categories = {"discovery","intrusive"}
 portrule = shortport.port_or_service(102, "iso-tsap", "tcp")
 
 ---
--- Function to send and receive the S7COMMS Packet
+-- Function to send and receive the S7COMM Packet
 --
 -- First argument is the socket that was created inside of the main Action
 -- this will be utilized to send and receive the packets from the host.
@@ -67,12 +67,12 @@ portrule = shortport.port_or_service(102, "iso-tsap", "tcp")
 function send_receive(socket, query)
   local sendstatus, senderr = socket:send(query)
   if(sendstatus == false) then
-    return "Error Sending S7COMMS"
+    return "Error Sending S7COMM"
   end
   -- receive response
   local rcvstatus,response = socket:receive()
   if(rcvstatus == false) then
-    return "Error Reading S7COMMS"
+    return "Error Reading S7COMM"
   end
   return response
 end
@@ -161,12 +161,12 @@ function second_parse_response(response, output)
   end
 end
 ---
---  Function to set the nmap output for the host, if a valid S7COMMS packet
+--  Function to set the nmap output for the host, if a valid S7COMM packet
 --  is received then the output will show that the port is open
 --  and change the output to reflect an S7 PLC
 --
 -- @param host Host that was passed in via nmap
--- @param port port that S7COMMS is running on
+-- @param port port that S7COMM is running on
 function set_nmap(host, port)
   --set port Open
   port.state = "open"
@@ -181,7 +181,7 @@ end
 ---
 --  Action Function that is used to run the NSE. This function will send the initial query to the
 --  host and port that were passed in via nmap. The initial response is parsed to determine if host
---  is a S7COMMS device. If it is then more actions are taken to gather extra information.
+--  is a S7COMM device. If it is then more actions are taken to gather extra information.
 --
 -- @param host Host that was scanned via nmap
 -- @param port port that was scanned via nmap
@@ -269,7 +269,7 @@ action = function(host,port)
     local pos, protocol_id = bin.unpack("C", response, 8)
     -- if protocol ID is not 0x32 then return nil
     if ( protocol_id ~= 0x32) then
-      stdnse.print_debug(1, "Not a successful S7COMMS Packet")
+      stdnse.print_debug(1, "Not a successful S7COMM Packet")
       return nil
     end
     response  = send_receive(sock, Read_SZL)
@@ -277,7 +277,7 @@ action = function(host,port)
     local pos, protocol_id = bin.unpack("C", response, 8)
     -- if protocol ID is not 0x32 then return nil
     if ( protocol_id ~= 0x32) then
-      stdnse.print_debug(1, "Not a successful S7COMMS Packet")
+      stdnse.print_debug(1, "Not a successful S7COMM Packet")
       return nil
     end
     response  = send_receive(sock, first_SZL_Request)
