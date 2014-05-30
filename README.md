@@ -200,7 +200,7 @@ Thanks to Positive Research, and Dmitry Efanov for creating PLCScan
 
 ####Purpose and Description
 
-The purpose of s7-enumerate.nse is to identify and enumerate Siemens SIMATIC S7 PLCs. A S7 is positively identified by querying TCP/102 with a pre-generated COTP and S7COMMS messages. The response messages will determine if it is a S7 PLC and lead to additional enumeration. Note: TCP/102 is used by multiple applications, one being S7COMMS.
+The purpose of s7-enumerate.nse is to identify and enumerate Siemens SIMATIC S7 PLCs. A S7 is positively identified by querying TCP/102 with a pre-generated COTP and S7COMM messages. The response messages will determine if it is a S7 PLC and lead to additional enumeration. Note: TCP/102 is used by multiple applications, one being S7COMM.
 
 Two S7 requests are sent after successful S7 communication has been established.
 
@@ -254,9 +254,9 @@ After Downloading s7-enumerate.nse you'll need to move it into the NSE Scripts d
 
 Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for S7 PLCs.
 
-	Windows: nmap -p 102 --script s7-enumerate <host>
+	Windows: nmap -p 102 --script s7-enumerate -sV <host>
 	
-	Linux: sudo nmap -p 102 --script s7-enumerate <host> 
+	Linux: sudo nmap -p 102 --script s7-enumerate -sV <host> 
 
 		
 ####Notes
