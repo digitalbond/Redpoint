@@ -938,6 +938,108 @@ function standard_query(socket, type)
   end
 
 end
+
+---
+--  Function to send a get-BBMD query to the discovered BACNet devices. 
+
+-- @param socket The socket that was created in the action function
+-- @param type Type is the type of packet to send, this can be firmware, application, object, description, or location
+function bbmd_query(socket, type)
+
+  -- set the BBMD query data for sending
+  local bbmd_query = bin.pack("H","81020004")
+
+  local query
+
+  -- determine what type of packet to send
+  if (type == "bbmd") then
+    query = bbmd_query
+  end
+
+  --try to pull the  information
+  local status, result = socket:send(query)
+  if(status == false) then
+    stdnse.print_debug(1, "Socket error sending query: %s", result)
+    return nil
+  end
+  -- receive packet from response
+  local rcvstatus, response = socket:receive()
+  if(rcvstatus == false) then
+    stdnse.print_debug(1, "Socket error receiving: %s", response)
+    return nil
+  end
+  -- validate valid BACNet Packet
+  if( string.starts(response, "\x81")) then  
+    local pos = 0
+  local info = ""
+  local ipaddr = ""
+  local lastloop = 0
+  local mask = ""
+  local bbmdlist = ""
+  local firstloop = 1
+  local length = 0
+
+  pos, length = bin.unpack(">S", response, 3)
+  length = length + 1
+    stdnse.print_debug(1, "BBMD: starting on bacnet bytes: " .. length)
+  if length < 15 then
+    stdnse.print_debug(1, "BBMD: bailing on not enough bytes: " .. length .. " < 15")
+    return nil
+  end
+  
+  
+  while pos < length do
+    stdnse.print_debug(1, "BBMD: current position: " .. pos)
+    ipaddr = ""
+    --Unpack and string up 4 octets of IP, and then the port, and then the mask
+    pos, info = bin.unpack("C", response, pos)
+    ipaddr = ipaddr .. info
+    pos, info = bin.unpack("C", response, pos)
+    ipaddr = ipaddr .. "." .. info
+    pos, info = bin.unpack("C", response, pos)
+    ipaddr = ipaddr .. "." .. info
+    pos, info = bin.unpack("C", response, pos)
+    ipaddr = ipaddr .. "." .. info
+    pos, info = bin.unpack(">S", response, pos)
+    ipaddr = ipaddr .. ":" .. info
+    pos, mask = bin.unpack("H4", response, pos)
+    stdnse.print_debug(1, "BBMD: found this: " .. ipaddr .. " mask: " .. mask)
+    
+    -- build the string
+    if firstloop == 1 then
+      bbmdlist = ipaddr
+    else
+      bbmdlist = bbmdlist .. ", " .. ipaddr
+    end
+  
+    -- consider if its time to quit, two ways
+    if pos == length then
+      stdnse.print_debug(1, "BBMD: bailing because we are at the end: " .. pos)
+      return bbmdlist
+    end
+    if pos == lastloop then
+      stdnse.print_debug(1, "BBMD: bailing on lack of advancement: " .. pos)
+      return bbmdlist
+    end
+    
+    stdnse.print_debug(1, "BBMD: bottom of while loop at: " .. pos)
+    -- set the lastloop to detect if we are stalled
+    lastloop = pos
+    -- turn off firstloop so the commas appear
+    firstloop = 0
+  end
+  stdnse.print_debug(1, "BBMD: done with loop")
+
+  return bbmdlist
+  -- else ERROR
+  else
+    stdnse.print_debug(1, "Error receiving BBMD: Invalid BACNet packet")
+    return nil
+  end
+
+end
+
+
 ---
 --  Function to send a query to the discovered BACNet devices. This function queries extra
 --  information to help identify the device. Vendor ID query is sent with this
@@ -1086,6 +1188,8 @@ action = function(host, port)
       -- Location
       to_return["Location"] = standard_query(sock, "location")
 
+      -- BBMD
+      to_return["BBMD"] = bbmd_query(sock, "bbmd")
     end
   else
     -- return nothing, no BACNet was detected
