@@ -36,7 +36,8 @@ http://digitalbond.com
 --|   Object Name: SimpleServer
 --|   Model Name: GNU
 --|   Description: server
---|_  Location: USA
+--|   Location: USA
+--|_  BBMD: 192.168.0.100:47808
 --
 -- @xmloutput
 --<elem key="Vendor ID">BACnet Stack at SourceForge (260)</elem>
@@ -47,6 +48,8 @@ http://digitalbond.com
 --<elem key="Model Name">GNU</elem>
 --<elem key="Description">server</elem>
 --<elem key="Location">USA</elem>
+--<elem key="BBMD">192.168.0.100:47808</elem>
+
 
 
 
@@ -943,7 +946,7 @@ end
 --  Function to send a get-BBMD query to the discovered BACNet devices. 
 
 -- @param socket The socket that was created in the action function
--- @param type Type is the type of packet to send, this can be firmware, application, object, description, or location
+-- @param type Type is the type of packet to send, this can only be bbmd for now
 function bbmd_query(socket, type)
 
   -- set the BBMD query data for sending
