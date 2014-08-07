@@ -944,96 +944,125 @@ function standard_query(socket, type)
 end
 
 ---
---  Function to send a get-BBMD query to the discovered BACNet devices. 
+--  Function to send a request for BVLC info to the discovered BACNet devices. 
 
 -- @param socket The socket that was created in the action function
--- @param type Type is the type of packet to send, this can only be bbmd for now
-function bbmd_query(socket, type)
+-- @param type Type is the type of packet to send, this can be bbmd or fdt
+function bvlc_query(socket, type)
 
   -- set the BBMD query data for sending
   local bbmd_query = bin.pack("H","81020004")
+  local fdt_query = bin.pack("H","81060004")
 
   local query
 
   -- determine what type of packet to send
   if (type == "bbmd") then
     query = bbmd_query
+  elseif (type == "fdt") then
+    query = fdt_query
   end
 
   --try to pull the  information
   local status, result = socket:send(query)
   if(status == false) then
-    stdnse.print_debug(1, "Socket error sending query: %s", result)
+    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
     return nil
   end
   -- receive packet from response
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "Socket error receiving: %s", response)
+    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error receiving: %s", response)
     return nil
   end
-  -- validate packet is both BACNet and type "read-broadcast-distribution-table-ack"
-  if( string.starts(response, "\x81\x03")) then  
-    local pos = 0
+  
+  -- validate that packet is BACNet, if so do the needful
+  if( string.starts(response, "\x81")) then
+  
+    -- set up locals
     local info = ""
-    local ipaddr = ""
     local lastloop = 0
-    local mask = ""
-    local bbmdlist = ""
+    local resultlist = ""
     local firstloop = 1
-    local length = 0
-
+    local length
+    local mask
+    local resptype
+    
+    --unpack response type
+    local pos, resptype = bin.unpack("C", response, 2)
+    
+    --unpack length and check it
     pos, length = bin.unpack(">S", response, 3)
     length = length + 1
-      stdnse.print_debug(1, "BBMD: starting on bacnet bytes: " .. length)
+      stdnse.print_debug(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
     if length < 15 then
-      stdnse.print_debug(1, "BBMD: bailing on not enough bytes: " .. length .. " < 15")
+      stdnse.print_debug(1, "BVLC-" .. type .. ": bailing on not enough bytes: " .. length .. " < 15")
       return nil
     end
     
     
     while pos < length do
-      stdnse.print_debug(1, "BBMD: current position: " .. pos)
-      ipaddr = ""
+      stdnse.print_debug(1, "BVLC-" .. type .. ": current position: " .. pos)
+      local ipaddr = ""
       --Unpack and string up 4 byte int IP
       pos, info = bin.unpack("<I", response, pos)
       ipaddr = ipOps.fromdword(info)
-      --Unpack port num
-      pos, info = bin.unpack(">S", response, pos)
-      ipaddr = ipaddr .. ":" .. info
-      --Unpack mask (we only show it in debug since its uninteresting)
-      pos, mask = bin.unpack("H4", response, pos)
-      stdnse.print_debug(1, "BBMD: found this: " .. ipaddr .. " mask: " .. mask)
-      
+
+      if resptype == 3 then
+        --work on a BBMD result
+        --Unpack port num
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":" .. info
+        --Unpack mask (we only show it in debug since its uninteresting)
+        pos, mask = bin.unpack("H4", response, pos)
+        stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr .. " mask: " .. mask)
+      elseif resptype == 7 then
+        --work on a FDT result
+        --Unpack port num
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":" .. info
+        --Unpack start TTL
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":ttl=" .. info
+        --Unpack time left
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":timeout=" .. info
+        stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
+      else
+        --we don't know what response type this is!
+        stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
+        return nil
+      end
+
       -- build the string
       if firstloop == 1 then
-        bbmdlist = ipaddr
+        resultlist = ipaddr
       else
-        bbmdlist = bbmdlist .. ", " .. ipaddr
+        resultlist = resultlist .. ", " .. ipaddr
       end
     
       -- consider if its time to quit, two ways
       if pos == length then
-        stdnse.print_debug(1, "BBMD: bailing because we are at the end: " .. pos)
-        return bbmdlist
+        stdnse.print_debug(1, "BVLC-" .. type .. ": bailing because we are at the end: " .. pos)
+        return resultlist
       end
       if pos == lastloop then
-        stdnse.print_debug(1, "BBMD: bailing on lack of advancement: " .. pos)
-        return bbmdlist
+        stdnse.print_debug(1, "BVLC-" .. type .. ": bailing on lack of advancement: " .. pos)
+        return resultlist
       end
       
-      stdnse.print_debug(1, "BBMD: bottom of while loop at: " .. pos)
+      stdnse.print_debug(1, "BVLC-" .. type .. ": bottom of while loop at: " .. pos)
       -- set the lastloop to detect if we are stalled
       lastloop = pos
       -- turn off firstloop so the commas appear
       firstloop = 0
     end
-    stdnse.print_debug(1, "BBMD: done with loop")
+    stdnse.print_debug(1, "BVLC-" .. type .. ": done with loop")
 
-    return bbmdlist
+    return resultlist
     -- else ERROR
   else
-    stdnse.print_debug(1, "Error receiving BBMD: Invalid BACNet packet")
+    stdnse.print_debug(1, "BVLC-" .. type .. ": Invalid BACNet packet")
     return nil
   end
 
@@ -1189,7 +1218,11 @@ action = function(host, port)
       to_return["Location"] = standard_query(sock, "location")
 
       -- BBMD
-      to_return["BBMD"] = bbmd_query(sock, "bbmd")
+      to_return["BBMD"] = bvlc_query(sock, "bbmd")
+      
+      -- FDT
+      to_return["FDT"] = bvlc_query(sock, "fdt")
+
     end
   else
     -- return nothing, no BACNet was detected
