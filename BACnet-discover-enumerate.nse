@@ -38,7 +38,8 @@ http://digitalbond.com
 --|   Model Name: GNU
 --|   Description: server
 --|   Location: USA
---|_  BBMD: 192.168.0.100:47808
+--|   BBMD: 192.168.0.100:47808
+--|_  FDT: 192.168.1.101:47809:ttl=60:timeout=37
 --
 -- @xmloutput
 --<elem key="Vendor ID">BACnet Stack at SourceForge (260)</elem>
@@ -50,6 +51,7 @@ http://digitalbond.com
 --<elem key="Description">server</elem>
 --<elem key="Location">USA</elem>
 --<elem key="BBMD">192.168.0.100:47808</elem>
+--<elem key="FDT">192.168.1.101:47809:ttl=60:timeout=37</elem>
 
 
 
@@ -950,7 +952,7 @@ end
 -- @param type Type is the type of packet to send, this can be bbmd or fdt
 function bvlc_query(socket, type)
 
-  -- set the BBMD query data for sending
+  -- set the BVLC query data for sending
   local bbmd_query = bin.pack("H","81020004")
   local fdt_query = bin.pack("H","81060004")
 
@@ -963,7 +965,7 @@ function bvlc_query(socket, type)
     query = fdt_query
   end
 
-  --try to pull the  information
+  --try to pull the information
   local status, result = socket:send(query)
   if(status == false) then
     stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
@@ -1034,7 +1036,7 @@ function bvlc_query(socket, type)
         return nil
       end
 
-      -- build the string
+      -- build the result string
       if firstloop == 1 then
         resultlist = ipaddr
       else
