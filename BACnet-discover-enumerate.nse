@@ -5,6 +5,7 @@ local stdnse = require "stdnse"
 local string = require "string"
 local table = require "table"
 local unicode = require "unicode"
+local ipOps = require "ipOps"
 
 description = [[
 Discovers and enumerates BACNet Devices collects device information based off
@@ -971,70 +972,66 @@ function bbmd_query(socket, type)
     stdnse.print_debug(1, "Socket error receiving: %s", response)
     return nil
   end
-  -- validate valid BACNet Packet
-  if( string.starts(response, "\x81")) then  
+  -- validate packet is both BACNet and type "read-broadcast-distribution-table-ack"
+  if( string.starts(response, "\x81\x03")) then  
     local pos = 0
-  local info = ""
-  local ipaddr = ""
-  local lastloop = 0
-  local mask = ""
-  local bbmdlist = ""
-  local firstloop = 1
-  local length = 0
+    local info = ""
+    local ipaddr = ""
+    local lastloop = 0
+    local mask = ""
+    local bbmdlist = ""
+    local firstloop = 1
+    local length = 0
 
-  pos, length = bin.unpack(">S", response, 3)
-  length = length + 1
-    stdnse.print_debug(1, "BBMD: starting on bacnet bytes: " .. length)
-  if length < 15 then
-    stdnse.print_debug(1, "BBMD: bailing on not enough bytes: " .. length .. " < 15")
-    return nil
-  end
-  
-  
-  while pos < length do
-    stdnse.print_debug(1, "BBMD: current position: " .. pos)
-    ipaddr = ""
-    --Unpack and string up 4 octets of IP, and then the port, and then the mask
-    pos, info = bin.unpack("C", response, pos)
-    ipaddr = ipaddr .. info
-    pos, info = bin.unpack("C", response, pos)
-    ipaddr = ipaddr .. "." .. info
-    pos, info = bin.unpack("C", response, pos)
-    ipaddr = ipaddr .. "." .. info
-    pos, info = bin.unpack("C", response, pos)
-    ipaddr = ipaddr .. "." .. info
-    pos, info = bin.unpack(">S", response, pos)
-    ipaddr = ipaddr .. ":" .. info
-    pos, mask = bin.unpack("H4", response, pos)
-    stdnse.print_debug(1, "BBMD: found this: " .. ipaddr .. " mask: " .. mask)
-    
-    -- build the string
-    if firstloop == 1 then
-      bbmdlist = ipaddr
-    else
-      bbmdlist = bbmdlist .. ", " .. ipaddr
-    end
-  
-    -- consider if its time to quit, two ways
-    if pos == length then
-      stdnse.print_debug(1, "BBMD: bailing because we are at the end: " .. pos)
-      return bbmdlist
-    end
-    if pos == lastloop then
-      stdnse.print_debug(1, "BBMD: bailing on lack of advancement: " .. pos)
-      return bbmdlist
+    pos, length = bin.unpack(">S", response, 3)
+    length = length + 1
+      stdnse.print_debug(1, "BBMD: starting on bacnet bytes: " .. length)
+    if length < 15 then
+      stdnse.print_debug(1, "BBMD: bailing on not enough bytes: " .. length .. " < 15")
+      return nil
     end
     
-    stdnse.print_debug(1, "BBMD: bottom of while loop at: " .. pos)
-    -- set the lastloop to detect if we are stalled
-    lastloop = pos
-    -- turn off firstloop so the commas appear
-    firstloop = 0
-  end
-  stdnse.print_debug(1, "BBMD: done with loop")
+    
+    while pos < length do
+      stdnse.print_debug(1, "BBMD: current position: " .. pos)
+      ipaddr = ""
+      --Unpack and string up 4 byte int IP
+      pos, info = bin.unpack("<I", response, pos)
+      ipaddr = ipOps.fromdword(info)
+      --Unpack port num
+      pos, info = bin.unpack(">S", response, pos)
+      ipaddr = ipaddr .. ":" .. info
+      --Unpack mask (we only show it in debug since its uninteresting)
+      pos, mask = bin.unpack("H4", response, pos)
+      stdnse.print_debug(1, "BBMD: found this: " .. ipaddr .. " mask: " .. mask)
+      
+      -- build the string
+      if firstloop == 1 then
+        bbmdlist = ipaddr
+      else
+        bbmdlist = bbmdlist .. ", " .. ipaddr
+      end
+    
+      -- consider if its time to quit, two ways
+      if pos == length then
+        stdnse.print_debug(1, "BBMD: bailing because we are at the end: " .. pos)
+        return bbmdlist
+      end
+      if pos == lastloop then
+        stdnse.print_debug(1, "BBMD: bailing on lack of advancement: " .. pos)
+        return bbmdlist
+      end
+      
+      stdnse.print_debug(1, "BBMD: bottom of while loop at: " .. pos)
+      -- set the lastloop to detect if we are stalled
+      lastloop = pos
+      -- turn off firstloop so the commas appear
+      firstloop = 0
+    end
+    stdnse.print_debug(1, "BBMD: done with loop")
 
-  return bbmdlist
-  -- else ERROR
+    return bbmdlist
+    -- else ERROR
   else
     stdnse.print_debug(1, "Error receiving BBMD: Invalid BACNet packet")
     return nil
