@@ -139,12 +139,31 @@ function bvlc_query(socket, type)
     pos, length = bin.unpack(">S", response, 3)
 	-- add one to length since Lua starts at 1 not 0
     length = length + 1
-      stdnse.print_debug(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
+    stdnse.print_debug(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
+	-- if length is 7(packet size 6), then we will test to see if it was NAK response
+    if length == 7 then
+	  -- response type will be BVLC-Result
+	  if resptype == 0 then
+	    -- unpack two bytes of interest 
+	    pos, byte1 = bin.unpack("C", response, 4)
+	    pos, byte2 = bin.unpack("C", response, 6) 
+	    if byte1 == 0x06 and byte2 == 0x40 then
+		  return "Non-Acknowledgement (NAK)"
+	    elseif byte1 == 0x06 and byte2 == 0x20 then
+		  return "Non-Acknowledgement (NAK)"
+		end
+	  end
+	-- if the packet length is 5(packet size 4) then check to see if a Empty response
+	elseif length == 5 then
+	  -- validate the response is for the FDT query 
+	  if resptype == 7 then
+	    return "Empty Table"
+	  end
 	-- if packet is not long enough then we will exit
-    if length < 15 then
+	elseif length < 15 then
       stdnse.print_debug(1, "BVLC-" .. type .. ": stopping, this response had not enough bytes: " .. length .. " < 15")
       return nil
-    end
+	end
     -- While loop for the length of the packet as determined from above.
     while pos < length do
       local ipaddr = ""
@@ -173,12 +192,11 @@ function bvlc_query(socket, type)
         ipaddr = ipaddr .. ":timeout=" .. info
         stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
 	  -- else the type was not something we were asking for
-      else
-        --we don't know what response type this is!
-        stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
+      --we don't know what response type this is!
+	  else
+		stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
         return nil
-      end
-
+	  end
       -- insert to the ips table for output to Nmap
       table.insert(ips, ipaddr)
 
@@ -268,9 +286,6 @@ action = function(host, port)
       
       -- FDT
       to_return["FDT"] = bvlc_query(sock, "fdt")
-	  if ( to_return["FDT"] == nil ) then
-        to_return["FDT"] = "Empty"
-      end
 
     end
   else
