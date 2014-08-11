@@ -163,7 +163,7 @@ To speed up results by not performing DNS lookups during the scan use the -n opt
 		
 ####Notes
 
-The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/BACnet-discover-enumerate.nse 
+The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/bacnet-enum.nse 
 
 This script uses the standard BACnet source and destination port of UDP 47808. 
 
