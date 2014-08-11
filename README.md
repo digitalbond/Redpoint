@@ -13,6 +13,8 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [BACnet-discover-enumerate.nse](https://github.com/digitalbond/Redpoint#bacnet-discover-enumeratense) - Identify and enumerate BACnet devices
 
+* [bacnet-enum.nse](https://github.com/digitalbond/Redpoint#bacnet-enumnse) - Enumerate other devices associated with a a BACNet Device.
+
 * [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
 
 * [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
@@ -104,6 +106,67 @@ The official version of this script is maintained at: https://github.com/digital
 This script uses the standard BACnet source and destination port of UDP 47808. 
 
 Newer (after February 25, 2004) BACnet devices are required by spec to respond to specific requests that use a 'catchall' object-identifier with their own valid instance number (see ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001).  Older versions of BACnet devices may not respond to this catchall, and will respond with a BACnet error packet instead.
+
+This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
+
+==
+###bacnet-enum.nse
+
+![bacnet-enum Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/03/BACnet-nse.png)
+
+####Authors
+
+Stephen Hilt and Michael Toecker  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+####Purpose and Description
+
+The purpose of bacnet-enum.nse is to first identify if an IP connected devices is running BACnet. This works by querying the device with a pregenerated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement, older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
+
+Once it is determined that a valid BACnet response the script will attempt to pull two types of information from the device.
+
+1) BBMD, BACnet Broadcast Management Device, listing from the device. 
+2) FDT, Foreign-Device-Table, listing from the device. 
+
+If it does not recive the BBMD or FDT but recives a Non-Acknowledgement a message will be shown that a NAK message was recieved. Also, if the FDT reply states taht the table is emtpy a message stating that the device table was empty will be shown. 
+
+
+####Installation
+
+This script requires nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading bacnet-enum.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move bacnet-enum.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading bacnet-enum.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv bacnet-enum.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet.
+
+	Windows: nmap -sU -p 47808 --script bacnet-enum <host>
+	
+	Linux: sudo nmap -sU -p 47808 --script bacnet-enum <host> 
+
+To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determine if the device is up by doing a -Pn option for full results. 
+
+	nmap -sU -Pn -p 47808 -n --script bacnet-enum <host>
+
+		
+####Notes
+
+The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/BACnet-discover-enumerate.nse 
+
+This script uses the standard BACnet source and destination port of UDP 47808. 
 
 This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
 
