@@ -112,11 +112,10 @@ This script does not attempt to join a BACnet network as a foreign device, it si
 ==
 ###bacnet-enum.nse
 
-![bacnet-enum Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/03/BACnet-nse.png)
 
 ####Authors
 
-Stephen Hilt and Michael Toecker  
+Stephen Hilt 
 [Digital Bond, Inc](http://www.digitalbond.com)
 
 ####Purpose and Description
