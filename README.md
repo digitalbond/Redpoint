@@ -125,6 +125,7 @@ The purpose of bacnet-enum.nse is to first identify if an IP connected devices i
 Once it is determined that a valid BACnet response the script will attempt to pull two types of information from the device.
 
 1) BBMD, BACnet Broadcast Management Device, listing from the device. 
+
 2) FDT, Foreign-Device-Table, listing from the device. 
 
 If it does not recive the BBMD or FDT but recives a Non-Acknowledgement a message will be shown that a NAK message was recieved. Also, if the FDT reply states taht the table is emtpy a message stating that the device table was empty will be shown. 
