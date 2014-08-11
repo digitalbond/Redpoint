@@ -11,7 +11,7 @@ This Nmap Script will enumerate the BBMD (BACnet Broadcast Management Device).
 This allows a device on one network to communicate with a device on another 
 network by using the BBMD to forward and route the messages. Also the NSE will 
 attempt to pull the FDT (Foreign-Device-Table), as well as the (TTL) Time To 
-Live, and timeout until the device willbe removed from the foreign device table. 
+Live, and timeout until the device will be removed from the foreign device table. 
 
 This process was submitted via Jeff Meden via the original 
 BACnet-discover-enumerate.nse script on github, it was determined to create a 
@@ -115,7 +115,7 @@ function bvlc_query(socket, type)
     stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
     return nil
   end
-  -- rRecive response from the query
+  -- Recive response from the query
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
     stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error receiving: %s", response)
@@ -125,7 +125,7 @@ function bvlc_query(socket, type)
   -- Validate that packet is BACNet, if it is then we will start parsing more response
   if( string.starts(response, "\x81")) then
   
-    -- set up vars 
+    -- init up vars 
     local info = ""
     local ips = {}
     local length
@@ -161,7 +161,8 @@ function bvlc_query(socket, type)
 	  end
 	-- if packet is not long enough then we will exit
 	elseif length < 15 then
-      stdnse.print_debug(1, "BVLC-" .. type .. ": stopping, this response had not enough bytes: " .. length .. " < 15")
+      stdnse.print_debug(1, 
+          "BVLC-" .. type .. ": stopping, this response had not enough bytes: " .. length .. " < 15")
       return nil
 	end
     -- While loop for the length of the packet as determined from above.
@@ -174,12 +175,12 @@ function bvlc_query(socket, type)
       if resptype == 3 then
         --Unpack port number used by host in BBMD
         pos, info = bin.unpack(">S", response, pos)
-		-- Make string to be stored in output table to be returned to Nmap
+	-- Make string to be stored in output table to be returned to Nmap
         ipaddr = ipaddr .. ":" .. info
         -- shift by 4 bytes
-		pos = pos + 4 
+	pos = pos + 4 
 		
-	  -- else if the type is FDT
+      -- else if the type is FDT
       elseif resptype == 7 then
         --Unpack port number
         pos, info = bin.unpack(">S", response, pos)
@@ -191,17 +192,17 @@ function bvlc_query(socket, type)
         pos, info = bin.unpack(">S", response, pos)
         ipaddr = ipaddr .. ":timeout=" .. info
         stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
-	  -- else the type was not something we were asking for
+      -- else the type was not something we were asking for
       --we don't know what response type this is!
-	  else
-		stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
+      else
+	stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
         return nil
-	  end
+      end
       -- insert to the ips table for output to Nmap
       table.insert(ips, ipaddr)
 
       -- consider if its time to quit based on the last pos from the last 
-	  -- unpack was the end of the packet
+      -- unpack was the end of the packet
       if pos == length then
         stdnse.print_debug(1, "BVLC-" .. type .. ": bailing because we are at the end: " .. pos)
         return ips
