@@ -120,15 +120,15 @@ Stephen Hilt
 
 ####Purpose and Description
 
-The purpose of bacnet-enum.nse is to first identify if an IP connected devices is running BACnet. This works by querying the device with a pregenerated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement, older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
+The purpose of bacnet-enum.nse is to first identify IP connected devices that are running BACnet. This works by querying a device with a pre-generated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement; older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
 
-Once it is determined that a valid BACnet response the script will attempt to pull two types of information from the device.
+For each identified BACnet capable device, the script will attempt to pull two types of BACnet information.
 
 1) BBMD, BACnet Broadcast Management Device, listing from the device. 
 
 2) FDT, Foreign-Device-Table, listing from the device. 
 
-If it does not recive the BBMD or FDT but recives a Non-Acknowledgement a message will be shown that a NAK message was recieved. Also, if the FDT reply states taht the table is emtpy a message stating that the device table was empty will be shown. 
+If it does not receive the BBMD or FDT, but receives a Non-Acknowledgement, the output will show that a NAK message was received.  
 
 
 ####Installation
@@ -138,13 +138,13 @@ This script requires nmap to run. If you do not have Nmap download and Install N
 
 #####Windows
 
-After downloading bacnet-enum.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+After downloading bacnet-enum.nse you will need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
 
 	move bacnet-enum.nse C:\Program Files (x86)\Nmap\scripts
 
 #####Linux
 
-After Downloading bacnet-enum.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+After Downloading bacnet-enum.nse you will need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
 		
 	sudo mv bacnet-enum.nse /usr/share/nmap/scripts
 		
