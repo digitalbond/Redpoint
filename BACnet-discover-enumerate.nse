@@ -5,6 +5,7 @@ local stdnse = require "stdnse"
 local string = require "string"
 local table = require "table"
 local unicode = require "unicode"
+local ipOps = require "ipOps"
 
 description = [[
 Discovers and enumerates BACNet Devices collects device information based off
@@ -12,6 +13,17 @@ standard requests. In some cases, devices may not strictly follow the
 specifications, or may comply with older versions of the specifications, and
 will result in a BACNET error response. Presence of this error positively
 identifies the device as a BACNet device, but no enumeration is possible.
+
+This Nmap Script will also attempt to enumerate the BBMD (BACnet Broadcast 
+Management Device). This allows a device on one network to communicate with a 
+device on another network by using the BBMD to forward and route the messages. 
+Also the NSE will attempt to pull the FDT (Foreign-Device-Table), as well as the 
+(TTL) Time To Live, and timeout until the device willbe removed from the foreign 
+device table. To utlize this feature, run with --script-args full=yes.
+
+This process was submitted via Jeff Meden via the original 
+BACnet-discover-enumerate.nse script on github, it was determined to create a 
+new script with the submitted methods. 
 
 Note: Requests and responses are via UDP 47808, ensure scanner will receive UDP
 47808 source and destination responses.
@@ -24,11 +36,11 @@ http://digitalbond.com
 -- @usage
 -- nmap --script BACnet-discover-enumerate.nse -sU  -p 47808 <host>
 --
--- @args aggressive - boolean value defines find all or just first sid
+-- @args full If set yes the script will run the FDT and BBMD Checks
 --
 -- @output
 --47808/udp open  BACNet -- Building Automation and Control Networks
---| bacnet-discover:
+--| BACnet-discover-enumerate.nse:
 --|   Vendor ID: BACnet Stack at SourceForge (260)
 --|   Instance Number: 260001
 --|   Firmware: 0.8.2
@@ -36,7 +48,12 @@ http://digitalbond.com
 --|   Object Name: SimpleServer
 --|   Model Name: GNU
 --|   Description: server
---|_  Location: USA
+--|   Location: USA
+--|   BACnet Broadcast Management Device (BBMD): 
+--|		    192.168.0.100:47808
+--|   Foreign Device Table (FDT): 
+--|_	    192.168.1.101:47809:ttl=60:timeout=37
+
 --
 -- @xmloutput
 --<elem key="Vendor ID">BACnet Stack at SourceForge (260)</elem>
@@ -47,10 +64,12 @@ http://digitalbond.com
 --<elem key="Model Name">GNU</elem>
 --<elem key="Description">server</elem>
 --<elem key="Location">USA</elem>
+--<elem key="BACnet Broadcast Management Device (BBMD)">192.168.0.100:47808</elem>
+--<elem key="Foreign Device Table (FDT)">192.168.1.101:47809:ttl=60:timeout=37</elem>
 
 
 
-author = "Stephen Hilt && Michael Toecker (Digital Bond)"
+author = "Stephen Hilt(Digital Bond)"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
 categories = {"discovery", "intrusive"}
 
@@ -997,6 +1016,138 @@ function vendornum_query(socket)
 end
 
 ---
+--  Function to send a request for BVLC info to the discovered BACNet devices. 
+--  This includes the BBMD and the FDT queries. These are read only and do not
+--  attempt to join the router as a Foreign Device. 
+--
+-- @param socket The socket that was created in the action function
+-- @param type Type is the type of packet to send, this can be bbmd or fdt
+function bvlc_query(socket, type)
+
+  -- set the BVLC query data for sending
+  -- BBMD = 0x02
+  local bbmd_query = bin.pack("H","81020004")
+  -- FDT = 0x06
+  local fdt_query = bin.pack("H","81060004")
+  -- initialize query var 
+  local query
+
+  -- Based on type parameter passed in from Action
+  if (type == "bbmd") then
+    query = bbmd_query
+  elseif (type == "fdt") then
+    query = fdt_query
+  end
+
+  -- Send the query that was set by the type
+  local status, result = socket:send(query)
+  if(status == false) then
+    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
+    return nil
+  end
+  -- Recive response from the query
+  local rcvstatus, response = socket:receive()
+  if(rcvstatus == false) then
+    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error receiving: %s", response)
+    return nil
+  end
+  
+  -- Validate that packet is BACNet, if it is then we will start parsing more response
+  if( string.starts(response, "\x81")) then
+  
+    -- init up vars 
+    local info = ""
+    local ips = {}
+    local length
+    local mask
+    local resptype
+    
+    -- unpack response type, this will be used to determine BBMD vs FDT
+    local pos, resptype = bin.unpack("C", response, 2)
+    
+    -- unpack length, this will be the length of the information to be parsed
+    pos, length = bin.unpack(">S", response, 3)
+	-- add one to length since Lua starts at 1 not 0
+    length = length + 1
+    stdnse.print_debug(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
+	-- if length is 7(packet size 6), then we will test to see if it was NAK response
+    if length == 7 then
+	  -- response type will be BVLC-Result
+	  if resptype == 0 then
+	    -- unpack two bytes of interest 
+	    pos, byte1 = bin.unpack("C", response, 4)
+	    pos, byte2 = bin.unpack("C", response, 6) 
+	    if byte1 == 0x06 and byte2 == 0x40 then
+		  return "Non-Acknowledgement (NAK)"
+	    elseif byte1 == 0x06 and byte2 == 0x20 then
+		  return "Non-Acknowledgement (NAK)"
+		end
+	  end
+	-- if the packet length is 5(packet size 4) then check to see if a Empty response
+	elseif length == 5 then
+	  -- validate the response is for the FDT query 
+	  if resptype == 7 then
+	    return "Empty Table"
+	  end
+	-- if packet is not long enough then we will exit
+	elseif length < 15 then
+      stdnse.print_debug(1, 
+          "BVLC-" .. type .. ": stopping, this response had not enough bytes: " .. length .. " < 15")
+      return nil
+	end
+    -- While loop for the length of the packet as determined from above.
+    while pos < length do
+      local ipaddr = ""
+      --Unpack and the IP Address from the response
+      pos, info = bin.unpack("<I", response, pos)
+      ipaddr = ipOps.fromdword(info)
+      -- if BBMD type
+      if resptype == 3 then
+        --Unpack port number used by host in BBMD
+        pos, info = bin.unpack(">S", response, pos)
+	-- Make string to be stored in output table to be returned to Nmap
+        ipaddr = ipaddr .. ":" .. info
+        -- shift by 4 bytes
+	pos = pos + 4 
+		
+      -- else if the type is FDT
+      elseif resptype == 7 then
+        --Unpack port number
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":" .. info
+        --Unpack TTL field
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":ttl=" .. info
+        --Unpack the timeout field
+        pos, info = bin.unpack(">S", response, pos)
+        ipaddr = ipaddr .. ":timeout=" .. info
+        stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
+      -- else the type was not something we were asking for
+      --we don't know what response type this is!
+      else
+	stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
+        return nil
+      end
+      -- insert to the ips table for output to Nmap
+      table.insert(ips, ipaddr)
+
+      -- consider if its time to quit based on the last pos from the last 
+      -- unpack was the end of the packet
+      if pos == length then
+        stdnse.print_debug(1, "BVLC-" .. type .. ": bailing because we are at the end: " .. pos)
+        return ips
+      end
+      stdnse.print_debug(1, "BVLC-" .. type .. ": done with loop")
+  end
+  -- else ERROR
+  else
+    stdnse.print_debug(1, "Invalid BACNet packet in response to: " .. type)
+    return nil
+  end
+
+end
+
+---
 --  Action Function that is used to run the NSE. This function will send the initial query to the
 --  host and port that were passed in via nmap. The initial response is parsed to determine if host
 --  is a BACNet device. If it is then more actions are taken to gather extra information.
@@ -1085,6 +1236,22 @@ action = function(host, port)
 
       -- Location
       to_return["Location"] = standard_query(sock, "location")
+	  
+      -- for each element in the table, if it is nil, then remove the information from the table
+      for key,value in pairs(to_return) do
+        if(string.len(to_return[key]) == 0) then
+          to_return[key] = nil
+        end
+      end
+	  
+	  arguments = stdnse.get_script_args('full')
+	  if ( arguments == "yes" ) then
+	    -- BACnet Broadcast Management Device Query/Response
+        to_return["BACnet Broadcast Management Device (BBMD)"] = bvlc_query(sock, "bbmd")
+      
+        -- Foreign Device Table Query/Response
+        to_return["Foreign Device Table (FDT)"] = bvlc_query(sock, "fdt")
+	  end
 
     end
   else
