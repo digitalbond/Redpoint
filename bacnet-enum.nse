@@ -282,11 +282,11 @@ action = function(host, port)
       -- set the nmap output for the port and version
       set_nmap(host, port)
 
-      -- BBMD
-      to_return["BBMD"] = bvlc_query(sock, "bbmd")
+      -- BACnet Broadcast Management Device Query/Response
+      to_return["BACnet Broadcast Management Device (BBMD)"] = bvlc_query(sock, "bbmd")
       
-      -- FDT
-      to_return["FDT"] = bvlc_query(sock, "fdt")
+      -- Foreign Device Table Query/Response
+      to_return["Foreign Device Table (FDT)"] = bvlc_query(sock, "fdt")
 
     end
   else
