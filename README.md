@@ -110,67 +110,6 @@ Newer (after February 25, 2004) BACnet devices are required by spec to respond t
 This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
 
 ==
-###bacnet-enum.nse
-
-
-####Authors
-
-Stephen Hilt 
-[Digital Bond, Inc](http://www.digitalbond.com)
-
-####Purpose and Description
-
-The purpose of bacnet-enum.nse is to first identify IP connected devices that are running BACnet. This works by querying a device with a pre-generated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement; older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
-
-For each identified BACnet capable device, the script will attempt to pull two types of BACnet information.
-
-1) BBMD, BACnet Broadcast Management Device, listing from the device. 
-
-2) FDT, Foreign-Device-Table, listing from the device. 
-
-If it does not receive the BBMD or FDT, but receives a Non-Acknowledgement, the output will show that a NAK message was received.  
-
-
-####Installation
-
-This script requires nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
-	http://nmap.org/download.html
-
-#####Windows
-
-After downloading bacnet-enum.nse you will need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
-
-	move bacnet-enum.nse C:\Program Files (x86)\Nmap\scripts
-
-#####Linux
-
-After Downloading bacnet-enum.nse you will need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
-		
-	sudo mv bacnet-enum.nse /usr/share/nmap/scripts
-		
-
-####Usage
-
-Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet.
-
-	Windows: nmap -sU -p 47808 --script bacnet-enum <host>
-	
-	Linux: sudo nmap -sU -p 47808 --script bacnet-enum <host> 
-
-To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determine if the device is up by doing a -Pn option for full results. 
-
-	nmap -sU -Pn -p 47808 -n --script bacnet-enum <host>
-
-		
-####Notes
-
-The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/bacnet-enum.nse 
-
-This script uses the standard BACnet source and destination port of UDP 47808. 
-
-This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
-
-==
 ###enip-enumerate.nse
 ![enip-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/enip.png)
 
