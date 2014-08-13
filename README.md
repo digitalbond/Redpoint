@@ -52,7 +52,14 @@ BACnet properties queried by this script are:
 
 8. Location - A user defined string for recording the physical location of the device, commonly entered by technicians on commissioning
 
+9. BACnet Broadcast Management Device (BBMD) - A functionality within a BACnet router to allow it to manage connectivity to other BACnet hosts on disparate subnets via UDP Unicast messaging (many-to-many communication).  
+
+10. Foreign Device Table (FDT) - Stored on the router and have a clear relationship with the BACnet broadcast network that the router is attached to. 
+
+
 The Object Identifier is the unique BACnet address of the device. Using the Object-Identifier, it is possible to send a larger number of commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. 
+
+To read the BBMD and the FDT a Nmap script argument was utilzied to provide flexability within one script to pull down the basic information, by not passing any arguments, or to pull the BBMD and FDT by using the script arguments. to do this you will need to run the command with the --script-args full=yes.
 
 This script uses a feature added in 2004 to the BACnet specification in order to retrieve the Object Identifier of a device with a single request, and without joining the BACnet network as a foreign device.  (See ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001 for details)
 
@@ -86,11 +93,13 @@ After Downloading BACnet-discover-enumerate.nse you'll need to move it into the 
 
 ####Usage
 
-Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet.
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet. To read the BBMD and the FDT a Nmap script argument was utilzied to provide flexability within one script to pull down the basic information, by not passing any arguments, or to pull the BBMD and FDT by using the script arguments. to do this you will need to run the command with the --script-args full=yes.
 
 	Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate <host>
+	Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate --script-args full=yes <host>
 	
 	Linux: sudo nmap -sU -p 47808 --script BACnet-discover-enumerate <host> 
+	Linux: sudo nmap -sU -p 47808 --script BACnet-discover-enumerate --script-args full=yes <host>
 
 To speed up results by not performing DNS lookups during the scan use the -n option, also disable pings to determine if the device is up by doing a -Pn option for full results. 
 
