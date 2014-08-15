@@ -928,13 +928,13 @@ function standard_query(socket, type)
   --try to pull the  information
   local status, result = socket:send(query)
   if(status == false) then
-    stdnse.print_debug(1, "Socket error sending query: %s", result)
+    stdnse.debug1(1, "Socket error sending query: %s", result)
     return nil
   end
   -- receive packet from response
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "Socket error receiving: %s", response)
+    stdnse.debug1(1, "Socket error receiving: %s", response)
     return nil
   end
   -- validate valid BACNet Packet
@@ -947,12 +947,12 @@ function standard_query(socket, type)
       return field_size(response)
       -- if it was an error packet, set the string to error for later purposes
     else
-      stdnse.print_debug(1, "Error receiving: BACNet Error")
+      stdnse.debug1(1, "Error receiving: BACNet Error")
       return nil
     end
     -- else ERROR
   else
-    stdnse.print_debug(1, "Error receiving Vendor ID: Invalid BACNet packet")
+    stdnse.debug1(1, "Error receiving Vendor ID: Invalid BACNet packet")
     return nil
   end
 
@@ -972,13 +972,13 @@ function vendornum_query(socket)
   --send the vendor information
   local status, result = socket:send(vendor_query)
   if(status == false) then
-    stdnse.print_debug(1, "Socket error sending vendor query: %s", result)
+    stdnse.debug1(1, "Socket error sending vendor query: %s", result)
     return nil
   end
   -- receive vendor information packet
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "Socket error receiving vendor query: %s", response)
+    stdnse.debug1(1, "Socket error receiving vendor query: %s", response)
     return nil
   end
   -- validate valid BACNet Packet
@@ -990,7 +990,7 @@ function vendornum_query(socket)
       -- this value determines if vendor number is 1 or 2 bytes
       pos, value = bin.unpack("C", response, 18)
     else
-      stdnse.print_debug(1, "Error receiving Vendor ID: BACNet Error")
+      stdnse.debug1(1, "Error receiving Vendor ID: BACNet Error")
       return nil
     end
     -- if value is 21 (byte 18)
@@ -1008,7 +1008,7 @@ function vendornum_query(socket)
       return vendor_lookup(vendornum)
     else
       -- set return value to an Error if byte 18 was not 21/22
-      stdnse.print_debug(1, "Error receiving Vendor ID: Invalid BACNet packet")
+      stdnse.debug1(1, "Error receiving Vendor ID: Invalid BACNet packet")
       return nil
     end
   end
@@ -1042,13 +1042,13 @@ function bvlc_query(socket, type)
   -- Send the query that was set by the type
   local status, result = socket:send(query)
   if(status == false) then
-    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
+    stdnse.debug1(1, "BVLC-" .. type .. ": Socket error sending query: %s", result)
     return nil
   end
   -- Recive response from the query
   local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "BVLC-" .. type .. ": Socket error receiving: %s", response)
+    stdnse.debug1(1, "BVLC-" .. type .. ": Socket error receiving: %s", response)
     return nil
   end
   
@@ -1069,7 +1069,7 @@ function bvlc_query(socket, type)
     pos, length = bin.unpack(">S", response, 3)
 	-- add one to length since Lua starts at 1 not 0
     length = length + 1
-    stdnse.print_debug(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
+    stdnse.debug1(1, "BVLC-" .. type .. ": starting on bacnet bytes: " .. length)
 	-- if length is 7(packet size 6), then we will test to see if it was NAK response
     if length == 7 then
 	  -- response type will be BVLC-Result
@@ -1091,7 +1091,7 @@ function bvlc_query(socket, type)
 	  end
 	-- if packet is not long enough then we will exit
 	elseif length < 15 then
-      stdnse.print_debug(1, 
+      stdnse.debug1(1, 
           "BVLC-" .. type .. ": stopping, this response had not enough bytes: " .. length .. " < 15")
       return nil
 	end
@@ -1121,11 +1121,11 @@ function bvlc_query(socket, type)
         --Unpack the timeout field
         pos, info = bin.unpack(">S", response, pos)
         ipaddr = ipaddr .. ":timeout=" .. info
-        stdnse.print_debug(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
+        stdnse.debug1(1, "BVLC-" .. type .. ": found this: " .. ipaddr)
       -- else the type was not something we were asking for
       --we don't know what response type this is!
       else
-	stdnse.print_debug(1, "BVLC-" .. type .. ": unknown response type encountered!")
+	stdnse.debug1(1, "BVLC-" .. type .. ": unknown response type encountered!")
         return nil
       end
       -- insert to the ips table for output to Nmap
@@ -1134,14 +1134,14 @@ function bvlc_query(socket, type)
       -- consider if its time to quit based on the last pos from the last 
       -- unpack was the end of the packet
       if pos == length then
-        stdnse.print_debug(1, "BVLC-" .. type .. ": bailing because we are at the end: " .. pos)
+        stdnse.debug1(1, "BVLC-" .. type .. ": bailing because we are at the end: " .. pos)
         return ips
       end
-      stdnse.print_debug(1, "BVLC-" .. type .. ": done with loop")
+      stdnse.debug1(1, "BVLC-" .. type .. ": done with loop")
   end
   -- else ERROR
   else
-    stdnse.print_debug(1, "Invalid BACNet packet in response to: " .. type)
+    stdnse.debug1(1, "Invalid BACNet packet in response to: " .. type)
     return nil
   end
 
@@ -1166,13 +1166,13 @@ action = function(host, port)
   --
   local status, err = sock:bind(nil, 47808)
   if(status == false) then
-    stdnse.print_debug(1,
+    stdnse.debug1(1,
       "Couldn't bind to 47808/udp. Continuing anyway, results may vary")
   end
   -- connect to the remote host
   local constatus, conerr = sock:connect(host, port)
   if not constatus then
-    stdnse.print_debug(1,
+    stdnse.debug1(1,
       'Error establishing a UDP connection for %s - %s', host, conerr
       )
     return nil
@@ -1180,7 +1180,7 @@ action = function(host, port)
   -- send the original query to see if it is a valid BACNet Device
   local sendstatus, senderr = sock:send(orig_query)
   if not sendstatus then
-    stdnse.print_debug(1,
+    stdnse.debug1(1,
       'Error sending BACNet request to %s:%d - %s',
       host.ip, port.number,  senderr
       )
@@ -1190,7 +1190,7 @@ action = function(host, port)
   -- receive response
   local rcvstatus, response = sock:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "Receive error: %s", response)
+    stdnse.debug1(1, "Receive error: %s", response)
     return nil
   end
 
@@ -1244,15 +1244,14 @@ action = function(host, port)
         end
       end
 	  
-	  arguments = stdnse.get_script_args('full')
-	  if ( arguments == "yes" ) then
-	    -- BACnet Broadcast Management Device Query/Response
+      arguments = stdnse.get_script_args('full')
+      if ( arguments == "yes" ) then
+        -- BACnet Broadcast Management Device Query/Response
         to_return["BACnet Broadcast Management Device (BBMD)"] = bvlc_query(sock, "bbmd")
       
         -- Foreign Device Table Query/Response
         to_return["Foreign Device Table (FDT)"] = bvlc_query(sock, "fdt")
-	  end
-
+      end
     end
   else
     -- return nothing, no BACNet was detected
