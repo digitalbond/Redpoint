@@ -18,8 +18,8 @@ This Nmap Script will also attempt to enumerate the BBMD (BACnet Broadcast
 Management Device). This allows a device on one network to communicate with a 
 device on another network by using the BBMD to forward and route the messages. 
 Also the NSE will attempt to pull the FDT (Foreign-Device-Table), as well as the 
-(TTL) Time To Live, and timeout until the device willbe removed from the foreign 
-device table. To utlize this feature, run with --script-args full=yes.
+(TTL) Time To Live, and time-out until the device willbe removed from the foreign 
+device table. To utilize this feature, run with --script-args full=yes.
 
 This process was submitted via Jeff Meden via the original 
 BACnet-discover-enumerate.nse script on github, it was determined to create a 
@@ -1243,11 +1243,11 @@ action = function(host, port)
           to_return[key] = nil
         end
       end
-	  
+	  -- check for script-args, if its set to yes, then run this additional queries
 	  arguments = stdnse.get_script_args('full')
       if ( arguments == "yes" ) then
         -- BACnet Broadcast Management Device Query/Response
-        to_return["BACnet Broadcast Management Device (BBMD)"] = bvlc_query(sock, "bbmd")
+        to_return[" BBMD Distribution Table (BDT)"] = bvlc_query(sock, "bbmd")
       
         -- Foreign Device Table Query/Response
         to_return["Foreign Device Table (FDT)"] = bvlc_query(sock, "fdt")
