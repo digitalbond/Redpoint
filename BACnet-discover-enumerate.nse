@@ -1244,7 +1244,7 @@ action = function(host, port)
         end
       end
 	  -- check for script-args, if its set to yes, then run this additional queries
-	  arguments = stdnse.get_script_args('full')
+	  local arguments = stdnse.get_script_args('full')
       if ( arguments == "yes" ) then
         -- BACnet Broadcast Management Device Query/Response
         to_return[" BBMD Distribution Table (BDT)"] = bvlc_query(sock, "bbmd")
