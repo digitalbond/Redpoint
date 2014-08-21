@@ -1247,7 +1247,7 @@ action = function(host, port)
 	  local arguments = stdnse.get_script_args('full')
       if ( arguments == "yes" ) then
         -- BACnet Broadcast Management Device Query/Response
-        to_return["BBMD Distribution Table (BDT)"] = bvlc_query(sock, "bbmd")
+        to_return["Broadcast Distribution Table (BDT)"] = bvlc_query(sock, "bbmd")
       
         -- Foreign Device Table Query/Response
         to_return["Foreign Device Table (FDT)"] = bvlc_query(sock, "fdt")
