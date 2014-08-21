@@ -58,6 +58,8 @@ BACnet properties queried by this script are:
 
 The BDT and FDT can be large lists and may be not desired in a large Nmap scan. The basic script will not pull down the BDT and FDT. Run the command with the --script-args full=yes to pull the BDT and FDT, see the Usage section.
 
+(http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/08/screenshot_bacnet-1.png)
+
 This script uses a feature added in 2004 to the BACnet specification in order to retrieve the Object Identifier of a device with a single request, and without joining the BACnet network as a foreign device.  (See ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001 for details)
 
 
