@@ -30,7 +30,7 @@ Stephen Hilt and Michael Toecker
 
 ####Purpose and Description
 
-The purpose of BACnet-discover-enumerate.nse is to first identify if an IP connected devices is running BACnet. This works by querying the device with a pregenerated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement, older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
+The purpose of BACnet-discover-enumerate.nse is to first identify if an IP connected devices is running BACnet. This works by querying the device with a pre-generated BACnet message. Newer versions of the BACnet protocol will respond with an acknowledgement, older versions will return a BACnet error message. Presence of either the acknowledgement or the error is sufficient to prove a BACnet capable device is at the target IP Address.
 
 Second, if an acknowledgement is received, this script will also attempt to enumerate several BACnet properties on a responsive BACnet device. Again, the device is queried with a pregenerated BACnet message. Successful enumeration uses specially crafted requests, and will not be successful if the BACnet device does not support the property. 
 
@@ -38,7 +38,7 @@ BACnet properties queried by this script are:
 
 1. Vendor ID - A number that corresponds to a registered BACnet Vendor. The script returns the associated vendor name as well.
 
-2. Object Identifier - A number that uniquely identifies the device, and can be used to initiate other BACnet operations against the device. This is a required property for all BACnet devices.
+2. Object Identifier - A number that uniquely identifies the device. If the Object-Identifier is known, it is possible to send commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. This is a required property for all BACnet devices.
 
 3. Firmware Revision - The revision number of the firmware on the BACnet device.
 
@@ -52,14 +52,11 @@ BACnet properties queried by this script are:
 
 8. Location - A user defined string for recording the physical location of the device, commonly entered by technicians on commissioning
 
-9. BACnet Broadcast Management Device (BBMD) - A functionality within a BACnet router to allow it to manage connectivity to other BACnet hosts on disparate subnets via UDP Unicast messaging (many-to-many communication).  
+9. Broadcast Distribution Table (BDT) - A list of the BACnet Broadcast Management Devices (BBMD) in the BACnet network. This will identify all of the subnets that are part of the BACnet network. 
 
-10. Foreign Device Table (FDT) - Stored on the router and have a clear relationship with the BACnet broadcast network that the router is attached to. 
+10. Foreign Device Table (FDT) - A list of foreign devices registered with the BACnet device. A foreign device is any device that is not on a subnet that is part of the BACnet network, not in the BDT. Foreign devices often are located on external networks and could be an attacker's IP address.  
 
-
-The Object Identifier is the unique BACnet address of the device. Using the Object-Identifier, it is possible to send a larger number of commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. 
-
-To read the BBMD and the FDT a Nmap script argument was utilzied to provide flexability within one script to pull down the basic information, by not passing any arguments, or to pull the BBMD and FDT by using the script arguments. to do this you will need to run the command with the --script-args full=yes.
+The BDT and FDT can be large lists and may be not desired in a large Nmap scan. The basic script will not pull down the BDT and FDT. Run the command with the --script-args full=yes to pull the BDT and FDT, see the Usage section.
 
 This script uses a feature added in 2004 to the BACnet specification in order to retrieve the Object Identifier of a device with a single request, and without joining the BACnet network as a foreign device.  (See ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001 for details)
 
@@ -93,7 +90,7 @@ After Downloading BACnet-discover-enumerate.nse you'll need to move it into the 
 
 ####Usage
 
-Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for BACNet. To read the BBMD and the FDT a Nmap script argument was utilzied to provide flexability within one script to pull down the basic information, by not passing any arguments, or to pull the BBMD and FDT by using the script arguments. to do this you will need to run the command with the --script-args full=yes.
+Inside a Terminal Window/Command Prompt use one of the following commands where host is the target you wish you scan for BACNet. Use --script-args full=yes if you want the output to included the BDT and FDT.
 
 	Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate <host>
 	Windows: nmap -sU -p 47808 --script BACnet-discover-enumerate --script-args full=yes <host>
