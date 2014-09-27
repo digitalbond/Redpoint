@@ -195,7 +195,7 @@ This script uses the standard Ethernet/IP destination port of TCP 44818.
 ==
 
 ###modicon-info.nse
-![modicon-info Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
+![modicon-info Sample Output] ()
 
 ####Author
 
