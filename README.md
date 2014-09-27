@@ -252,7 +252,7 @@ After Downloading modicon-info.nse you'll need to move it into the NSE Scripts d
 
 ####Usage
 
-Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for S7 PLCs.
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for Modicon PLCs.
 
 	Windows: nmap -p 502 --script modicon-info.nse -sV <host>
 	
