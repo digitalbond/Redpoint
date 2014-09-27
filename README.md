@@ -194,6 +194,77 @@ This script uses the standard Ethernet/IP destination port of TCP 44818.
 
 ==
 
+###modicon-info.nse
+![modicon-info Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
+
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+####Purpose and Description
+
+The purpose of modicon-info.nse is to first identify if an IP connected devices is running Modbus. This works by querying the device with a pre-generated function code 43 Modbus message. Presence of either the acknowledgement or the error is sufficient to prove a Modbus capable device is at the target IP Address.
+
+Second, if the vendor name contains the string Schneider, this script will also attempt to enumerate several Modbus Function code 90 properties on a positively identified Schneider Electric Device. This information will include information about the device, as well as information about who and what programmed the PLC.
+
+Modbus Function Code 43, and Function Code 90 properties queried by this script are:
+
+1) Vendor Name - A String within a Function Code 43 response to identify the device as a Schneider Electric Device. Once Identified it will continue to pull information via Function Code 90
+
+2) Network Module - A String that is returned as well with the Function Code 43 Response
+
+3) CPU Module - A String that is queried via Function Code 90, This will represent the CPU module within the Chassis 
+
+4) Firmware - A string that represents the firmware version running on the Modicon, this information is also found within the Function Code 43 response.
+
+5) Memory Card - The model number of the Memory card that is located within the CPU Module, This information is beneficial for a asset inventory stance. 
+
+6) Project Information - Miscellaneous information about the project, such as the project name, the version of Unity Pro that was used to configure it, as well as the workstation name that programmed the PLC. Some Devices will provide the location of the .stu file on the workstation that configured the device.
+
+7) Project Revision - The revision of the project running on the PLC, the project revision number increments by 1 each time a the project is built, and transferred to the PLC.
+
+8) Project Last Modified Date - A time stamp that is stored for when the last time the PLC was modified by a technician.  
+
+####History and Background
+
+From Wikipedia article on Programmable Logic Controllers http://en.wikipedia.org/wiki/Programmable_logic_controller#History:
+
+> In 1968 GM Hydra-Matic (the automatic transmission division of General Motors) issued a request for proposals for an electronic replacement for hard-wired relay systems based on a white paper written by engineer Edward R. Clark. The winning proposal came from Bedford Associates of Bedford, Massachusetts. The first PLC, designated the 084 because it was Bedford Associates' eighty-fourth project, was the result.[2] Bedford Associates started a new company dedicated to developing, manufacturing, selling, and servicing this new product: Modicon, which stood for MOdular DIgital CONtroller. One of the people who worked on that project was Dick Morley, who is considered to be the "father" of the PLC.[3] The Modicon brand was sold in 1977 to Gould Electronics, and later acquired by German Company AEG and then by French Schneider Electric, the current owner.
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading modicon-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move modicon-info.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading modicon-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv modicon-info.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for S7 PLCs.
+
+	Windows: nmap -p 502 --script modicon-info.nse -sV <host>
+	
+	Linux: sudo nmap -p 502 --script modicon-info.nse -sV <host> 
+
+		
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/modicon-info.nse
+
+This script uses the standard Modbus destination port of TCP 502. 
+
 ###s7-enumerate.nse
 ![s7-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
 
