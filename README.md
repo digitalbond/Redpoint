@@ -15,6 +15,8 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
 
+* [modicon-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#modicon-infonse) - Identify and enumerate Siemens SIMATIC S7 PLCs
+ 
 * [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
 ==
@@ -204,21 +206,21 @@ Stephen Hilt
 
 ####Purpose and Description
 
-The purpose of modicon-info.nse is to first identify if an IP connected devices is running Modbus. This works by querying the device with a pre-generated function code 43 Modbus message. Presence of either the acknowledgement or the error is sufficient to prove a Modbus capable device is at the target IP Address.
+The purpose of modicon-info.nse is to first identify and enumerate Modicon PLC's made by Schneider Electric. 
 
-Second, if the vendor name contains the string Schneider, this script will also attempt to enumerate several Modbus Function code 90 properties on a positively identified Schneider Electric Device. This information will include information about the device, as well as information about who and what programmed the PLC.
+The script first identifies if an IP connected device is sending a Modbus function code 43 request. The response is sufficient to identify Modbus devices even if they do not support function code 43. If the response vendor name contains the string Schneider, the script will enumerate the device using the Schneider Electric proprietary Modbus function code 90. 
 
-Modbus Function Code 43, and Function Code 90 properties queried by this script are:
+Modbus function code 43 and function code 90 properties that are included in the script output are:
 
-1) Vendor Name - A String within a Function Code 43 response to identify the device as a Schneider Electric Device. Once Identified it will continue to pull information via Function Code 90
+1) Vendor Name - This script will ignore all devices that do not contain "Schneider".
 
-2) Network Module - A String that is returned as well with the Function Code 43 Response
+2) Network Module - The Ethernet communications module in the Modicon PLC.
 
-3) CPU Module - A String that is queried via Function Code 90, This will represent the CPU module within the Chassis 
+3) CPU Module - The CPU module in the Modicon PLC.
 
-4) Firmware - A string that represents the firmware version running on the Modicon, this information is also found within the Function Code 43 response.
+4) Firmware - The firmware version on the CPU module in the Modicon PLC.
 
-5) Memory Card - The model number of the Memory card that is located within the CPU Module, This information is beneficial for a asset inventory stance. 
+5) Memory Card - The model number of the memory card in the CPU module. 
 
 6) Project Information - Miscellaneous information about the project, such as the project name, the version of Unity Pro that was used to configure it, as well as the workstation name that programmed the PLC. Some Devices will provide the location of the .stu file on the workstation that configured the device.
 
@@ -234,18 +236,19 @@ From Wikipedia article on Programmable Logic Controllers http://en.wikipedia.org
 
 ####Installation
 
-This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+This script requires Nmap to run. If you do not have Nmap download and install Nmap.
+
 	http://nmap.org/download.html
 
 #####Windows
 
-After downloading modicon-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+After downloading modicon-info.nse, move it into the NSE Scripts directory. This will require Administrator privileges. Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'. Select 'Run as Administrator'.
 
 	move modicon-info.nse C:\Program Files (x86)\Nmap\scripts
 
 #####Linux
 
-After Downloading modicon-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+After downloading modicon-info.nse, move it into the NSE Scripts directory. This will have to be done as sudo/root.
 		
 	sudo mv modicon-info.nse /usr/share/nmap/scripts
 		
