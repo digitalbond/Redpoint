@@ -15,7 +15,7 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
 
-* [modicon-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#modicon-infonse) - Identify and enumerate Siemens SIMATIC S7 PLCs
+* [modicon-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#modicon-infonse) - Identify and enumerate Schneider Electric Modicon PLCs
  
 * [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
