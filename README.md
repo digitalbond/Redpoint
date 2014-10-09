@@ -231,7 +231,7 @@ Niagara Fox properties queried by this script are:
 
 9. Time Zone - The local time zone configured on the remote host.
 
-10. Host ID - a Unique ID that is used to Identify the Remote host.
+10. Host ID - a Unique ID that is used to identify the remote host.
 
 11. VM UUID - The Java VM Universally Unique Identifier.
 
