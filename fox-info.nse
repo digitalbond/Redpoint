@@ -23,7 +23,7 @@ http://digitalbond.com
 -- @args aggressive - boolean value defines find all or just first sid
 --
 -- @output
--- 1911/tcp open  NiagaraAX
+-- 1911/tcp open  Niagara Fox
 -- | fox-info: 
 -- |   Fox Version: 1.0.1
 -- |   Host Name: xpvm-0omdc01xmy
@@ -77,18 +77,18 @@ function string:split(sep)
 end
 
 ---
---  Function to set the Nmap output for the host, if a valid NiagaraAX packet
+--  Function to set the Nmap output for the host, if a valid Niagara Fox packet
 --  is received then the output will show that the port is open instead of
 --  <code>open|filtered</code>
 --
 -- @param host Host that was passed in via nmap
--- @param port port that NiagaraAX is running on (Default UDP/47808)
+-- @param port port that Niagara Fox is running on (Default UDP/47808)
 function set_nmap(host, port)
 
   --set port Open
   port.state = "open"
-  -- set version name to NiagaraAX
-  port.version.name = "NiagaraAX"
+  -- set version name to Niagara Fox
+  port.version.name = "Niagara Fox"
   nmap.set_port_version(host, port)
   nmap.set_port_state(host, port, "open")
 
@@ -109,7 +109,7 @@ end
 ---
 --  Action Function that is used to run the NSE. This function will send the 
 --  initial query to the host and port that were passed in via nmap. The 
---  initial response is parsed to determine if host is a NiagaraAX device. If it 
+--  initial response is parsed to determine if host is a Niagara Fox device. If it 
 --  is then more actions are taken to gather extra information.
 --
 -- @param host Host that was scanned via nmap
@@ -147,11 +147,11 @@ action = function(host, port)
       )
     return nil
   end
-  -- send the original query to see if it is a valid NiagaraAX Device
+  -- send the original query to see if it is a valid Niagara Fox Device
   local sendstatus, senderr = sock:send(orig_query)
   if not sendstatus then
     stdnse.print_debug(1,
-      'Error sending NiagaraAX request to %s:%d - %s',
+      'Error sending Niagara Fox request to %s:%d - %s',
       host.ip, port.number,  senderr
       )
     return nil
