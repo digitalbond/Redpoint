@@ -196,6 +196,81 @@ This script uses the standard Ethernet/IP destination port of TCP 44818.
 
 ==
 
+###fox-info.nse
+
+![fox-info Sample Output] (http://www.digitalbond.com/wp-content/uploads/2014/10/fox-example.png)
+
+####Authors
+
+Stephen Hilt 
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+####Purpose and Description
+
+The purpose of fox-info.nse is to first identify if an IP connected devices is running Niagara Fox. This works by querying the device with a pre-generated Niagara Fox message. This is based off the work and examples provided by Billy Rios and Terry McCorkle.
+
+Upon successful connection to a Niagara Fox device, the response will be parsed for Fields that that are interesting from multiple stances, such as 
+
+Niagara Fox properties queried by this script are:
+
+1. Fox Version- This is a string that represents the version of the Fox Protocol that is currently running on the device.
+
+2. Host Name - The Host Name of the remote device. This usually is the workstation name of the remote device. 
+
+3. Host Address - The IP address configured on the remote device. This can be the IP address scanned or a private address if the device is behind a NAT.
+
+4. Application Name - The Name of the Application that is running on the remote device. This will be Workbench or station based on the configuration of the device. 
+
+5. Application Version - A value that represents the Version of the Application mentioned above.
+
+6. VM Name - The VM Name is a Java Virtual Machine that is running the application.
+
+7. VM Version - The Version Number of the VM that is running on the remote device, this will be most likely the Java HotSpot Version Number.
+
+8. OS Name - Name of the OS running the Fox Protocol on the remote Host, an example is Windows XP or Windows 7. 
+
+9. Time Zone - The local time zone configured on the remote host.
+
+10. Host ID - a Unique ID that is used to Identify the Remote host.
+
+11. VM UUID - The Java VM Universally Unique Identifier.
+
+12. Brand ID -  Every licensed station and tool has a Brand Identifier. This field holds a text descriptor that the OEM chooses as the identifier for its product line. Each station or tool can have only one BrandID entry
+
+
+####Installation
+
+This script requires nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading fox-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move fox-info.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading fox-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv fox-info.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where host is the target you wish you scan for Niagara Fox. 
+
+	Windows: nmap -p 1911 --script fox-info <host>
+		
+	Linux: sudo nmap -p 1911 --script fox-info <host> 
+	
+	
+####Notes
+
+The official version of this script is maintained at: https://github.com/digitalbond/Redpoint/blob/master/fox-info.nse 
+
+This script uses the standard Niagara Fox source and destination port of TCP 1911. 
+
 ###modicon-info.nse
 ![modicon-info sample output] (http://www.digitalbond.com/wp-content/uploads/2014/09/Modicon.png)
 
