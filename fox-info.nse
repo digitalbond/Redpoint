@@ -142,7 +142,7 @@ action = function(host, port)
   -- connect to the remote host
   local constatus, conerr = sock:connect(host, port)
   if not constatus then
-    stdnse.print_debug(1,
+    stdnse.debug1(
       'Error establishing a UDP connection for %s - %s', host, conerr
       )
     return nil
@@ -150,7 +150,7 @@ action = function(host, port)
   -- send the original query to see if it is a valid Niagara Fox Device
   local sendstatus, senderr = sock:send(orig_query)
   if not sendstatus then
-    stdnse.print_debug(1,
+    stdnse.debug1(
       'Error sending Niagara Fox request to %s:%d - %s',
       host.ip, port.number,  senderr
       )
@@ -160,7 +160,7 @@ action = function(host, port)
   -- receive response
   local rcvstatus, response = sock:receive()
   if(rcvstatus == false) then
-    stdnse.print_debug(1, "Receive error: %s", response)
+    stdnse.debug1( "Receive error: %s", response)
     return nil
   end
   -- split the response on 0x0a (NL char)
