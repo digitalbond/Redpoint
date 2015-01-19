@@ -895,6 +895,9 @@ end
 -- @param type Type is the type of packet to send, this can be firmware, application, object, description, or location
 function standard_query(socket, type)
 
+
+  -- set the query for vendor name
+  local vendor_query = bin.pack("H","810a001101040005010c0c023FFFFF1979")
   -- set the firmware version query data for sending
   local firmware_query = bin.pack("H","810a001101040005010c0c023FFFFF192c")
   -- set the application version query data for sending
@@ -923,6 +926,8 @@ function standard_query(socket, type)
     query = desc_query
   elseif (type == "location") then
     query = location_query
+  elseif (type == "vendor") then
+    query = vendor_query
   end
 
   --try to pull the  information
@@ -1213,6 +1218,9 @@ action = function(host, port)
 
       -- Vendor Number to Name lookup
       to_return["Vendor ID"] = vendornum_query(sock)
+
+      -- vendor name
+      to_return["Vendor Name"] = standard_query(sock, "vendor")
 
       -- Instance Number (object number)
       local instance_upper, instance
