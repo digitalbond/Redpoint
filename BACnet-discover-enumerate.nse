@@ -67,12 +67,9 @@ http://digitalbond.com
 --<elem key="BACnet Broadcast Management Device (BBMD)">192.168.0.100:47808</elem>
 --<elem key="Foreign Device Table (FDT)">192.168.1.101:47809:ttl=60:timeout=37</elem>
 
-
-
 author = "Stephen Hilt(Digital Bond)"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
 categories = {"discovery", "intrusive"}
-
 
 --
 -- Function to define the portrule as per nmap standards
@@ -1162,8 +1159,8 @@ end
 action = function(host, port)
   --set the first query data for sending
   local orig_query = bin.pack("H","810a001101040005010c0c023FFFFF194b" )
-  local to_return = nil
-
+  
+local to_return = nil
   -- create new socket
   local sock = nmap.new_socket()
   -- Bind to port for niceness with BACNet this may need to be commented out if
