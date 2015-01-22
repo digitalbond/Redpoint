@@ -40,23 +40,25 @@ BACnet properties queried by this script are:
 
 1. Vendor ID - A number that corresponds to a registered BACnet Vendor. The script returns the associated vendor name as well.
 
-2. Object Identifier - A number that uniquely identifies the device. If the Object-Identifier is known, it is possible to send commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. This is a required property for all BACnet devices.
+2. Vendor Number - A String that represents the Vendor Name that is configured on the device. This can differ from the Vendor ID as the Vendor ID is the Number registered with ASHARE. 
 
-3. Firmware Revision - The revision number of the firmware on the BACnet device.
+3. Object Identifier - A number that uniquely identifies the device. If the Object-Identifier is known, it is possible to send commands with BACnet client software, including those that change values, programs, schedules, and other operational information on BACnet devices. This is a required property for all BACnet devices.
 
-4. Application Software Revision - The revision number of the software being used for BACnet communication.
+4. Firmware Revision - The revision number of the firmware on the BACnet device.
 
-5. Object Name - A user defined string that assigns a name to the BACnet device, commonly entered by technicians on commissioning. This is a required property for all BACnet devices.
+5. Application Software Revision - The revision number of the software being used for BACnet communication.
 
-6. Model Name - The model of the BACnet device
+6. Object Name - A user defined string that assigns a name to the BACnet device, commonly entered by technicians on commissioning. This is a required property for all BACnet devices.
 
-7. Description - A user defined string for describing the device, commonly entered by technicians on commissioning
+7. Model Name - The model of the BACnet device
 
-8. Location - A user defined string for recording the physical location of the device, commonly entered by technicians on commissioning
+8. Description - A user defined string for describing the device, commonly entered by technicians on commissioning
 
-9. Broadcast Distribution Table (BDT) - A list of the BACnet Broadcast Management Devices (BBMD) in the BACnet network. This will identify all of the subnets that are part of the BACnet network. 
+9. Location - A user defined string for recording the physical location of the device, commonly entered by technicians on commissioning
 
-10. Foreign Device Table (FDT) - A list of foreign devices registered with the BACnet device. A foreign device is any device that is not on a subnet that is part of the BACnet network, not in the BDT. Foreign devices often are located on external networks and could be an attacker's IP address.  
+11. Broadcast Distribution Table (BDT) - A list of the BACnet Broadcast Management Devices (BBMD) in the BACnet network. This will identify all of the subnets that are part of the BACnet network. 
+
+12. Foreign Device Table (FDT) - A list of foreign devices registered with the BACnet device. A foreign device is any device that is not on a subnet that is part of the BACnet network, not in the BDT. Foreign devices often are located on external networks and could be an attacker's IP address.  
 
 The BDT and FDT can be large lists and may be not desired in a large Nmap scan. The basic script will not pull down the BDT and FDT. Run the command with the --script-args full=yes to pull the BDT and FDT, see the Usage section.
 
