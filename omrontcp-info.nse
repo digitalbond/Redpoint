@@ -76,6 +76,19 @@ function set_nmap(host, port)
 
 end
 
+local memcard = {
+  [0] = "No Memory Card",
+  [1] = "SPRAM",
+  [2] = "EPROM",
+  [3] = "EEPROM"
+}
+
+function memory_card(value)
+  local mem_card = memcard[value] or "Unknown Memory Card Type"
+  return mem_card
+end
+
+
 ---
 --  Action Function that is used to run the NSE. This function will send the initial query to the
 --  host and port that were passed in via nmap. The initial response is parsed to determine if host
@@ -146,7 +159,9 @@ action = function(host,port)
 	  pos, output["Timer/Counter"] = bin.unpack("C", response, pos)
 	  pos, output["Expansion DM Size"] = bin.unpack("C", response, pos)
 	  pos, output["No. of steps/transitions"] = bin.unpack(">S", response, pos)
-	  pos, output["Kind of Memory Card"] = bin.unpack("C", response, pos)
+	  local mem_card_type
+	  pos, mem_card_type = bin.unpack("C", response, pos)
+	  output["Kind of Memory Card"] = memory_card(mem_card_type)
 	  pos, output["Memory Card Size"] = bin.unpack(">S", response, pos)
 	  -- close socket and return output 
 	  socket:close() 
