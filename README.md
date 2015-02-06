@@ -346,6 +346,98 @@ The official version of this script is maintained at:https://github.com/digitalb
 
 This script uses the standard Modbus destination port of TCP 502. 
 
+==
+###omrontcp-info.nse & omronudp-info.nse
+![omrontcp/udp-info Sample Output] (http://www.digitalbond.com/wp-content/uploads/2015/02/Region.png)
+
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+
+####Purpose and Description
+
+The purpose of omrontcp-info and omronudp-info is to identify and enumerate OMRON FINS devices. Omron develed the protocol and is the primary maker of the devices that support this protocol. 
+
+An OMRON FINS device is positively identified by querying TCP/9600 or UDP 9600 with a Read Controller Satus (0x0501). The response messages will determine if it is a OMRON FINS device  device and parse the information to enumerate the device. 
+
+The OMRONS FINS Read Controller Status pulls basic information about the devie such as Controller Model, Controller Version, Program area size, IOM size, No. of DM Words, Timer/Counter size, Expansion DMZ size, No. of steps/transitions, Kind of memory card and memory card size.
+
+OMRON FINS properties parsed by this script are:
+
+1. Controller Model - A string no larger than 20 bytes that represents the Controller Model
+
+2. Controller Version - A string to represent a version number that is no larger than 20 bytes.
+
+3. For System Use - Reserved for system use. Collecting Information just to see if there is anything intresting in this field
+
+4. Program area size - The size of PC Setup and program area.
+
+5. IOM size - The size of the area in which bit/word commands can be used.
+
+6. No. of DM words - Total words in the DM area. 
+
+7. Timer/counter size - Maximum no. of timers/counters available.
+
+8. Expansion DM size - Banks in the expansion DM area 
+
+9.  No. of steps/transitions - Maximum no. of steps/transitions available
+
+10.  Kind of memory card - 00: No memory card
+01: SPRAM
+02: EPROM
+03: EEPROM
+
+11. Memory card size - Size of the memory card in Kb
+
+
+####History and Background
+
+
+> FINS or Factory Intelligent Network Services is a protocol that utlizes commands to communicate to PLCs. The protocol supports a version over UDP as well as a version over TCP. There are some differences on the two protocols thats why two scripts are written to support scanning both TCP and UDP services. 
+
+>OMRON FINS is used in industrial automation control systems, such as for water processing plants, manufacturing facilities and utilities. 
+	
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move omron*.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv omron*.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for OMRON FINS.
+
+	Windows: nmap -p 9600 --script omrontcp-info <host> 
+	Windows: nmap -sU -p 9600 --script omronudp-info <host>
+	
+	Linux: nmap -p 9600 --script omrontcp-info <host> 
+	Linux: sudo nmap -sU -p 9600 --script omronudp-info <host>
+
+		
+####Notes
+
+The official TCP version of this script is maintained at:https://github.com/digitalbond/Redpoint/omrontcp-info.nse
+The official UDP version of this script is maintained at:https://github.com/digitalbond/Redpoint/omronudp-info.nse
+
+These scripts use the standard FINS and TCP/FINS destination port of UDP 9600 and TCP 9600. 
+
+==
+
 ###s7-enumerate.nse
 ![s7-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
 
