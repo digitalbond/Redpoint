@@ -139,13 +139,9 @@ action = function(host,port)
     pos, response_code = bin.unpack("<S", response, 29)
 	-- test for a few of the error codes I saw when testing the script
 	if(response_code == 2081) then
-	  socket:close()
 	  output["Response Code"] = "Data cannot be changed (0x2108)"
-	  return output
 	elseif(response_code == 290) then
-	  socket:close()
 	  output["Response Code"] = "The mode is wrong (executing) (0x2201)"
-	  return output
 	elseif(response_code == 0) then
 	  -- parse information from response
 	  pos, output["Response Code"] = "Normal completion (0x0000)"
@@ -162,15 +158,12 @@ action = function(host,port)
 	  pos, mem_card_type = bin.unpack("C", response, pos)
 	  output["Kind of Memory Card"] = memory_card(mem_card_type)
 	  pos, output["Memory Card Size"] = bin.unpack(">S", response, pos)
-	  -- close socket and return output 
-	  socket:close() 
-	  return output
 	else 
-	  -- close socket and return unknown response code 
-	  socket:close()
 	  output["Response Code"] = "Unknown Response Code"
-	  return output
-	end	
+	end
+	-- close socket, return output
+	socket:close()
+	return output
 		
   else
     -- close socket and return nil
