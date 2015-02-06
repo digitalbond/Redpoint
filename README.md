@@ -432,6 +432,7 @@ Inside a Terminal Window/Command Prompt use one of the following commands where 
 ####Notes
 
 The official TCP version of this script is maintained at:https://github.com/digitalbond/Redpoint/omrontcp-info.nse
+
 The official UDP version of this script is maintained at:https://github.com/digitalbond/Redpoint/omronudp-info.nse
 
 These scripts use the standard FINS and TCP/FINS destination port of UDP 9600 and TCP 9600. 
