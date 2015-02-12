@@ -573,7 +573,9 @@ Inside a Terminal Window/Command Prompt use one of the following commands where 
 The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/proconos-info.nse
 
 This script uses the standard ProConOS/MultiProg destination port of TCP 20547. 
+
 ==
+
 ###s7-enumerate.nse
 ![s7-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
 
