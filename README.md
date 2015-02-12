@@ -438,7 +438,133 @@ The official UDP version of this script is maintained at:https://github.com/digi
 These scripts use the standard FINS and TCP/FINS destination port of UDP 9600 and TCP 9600. 
 
 ==
+###pcworx-info.nse
+![pcworx-info Sample Output] (http://www.digitalbond.com/wp-content/uploads/2015/02/pcworx.png)
 
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+
+####Purpose and Description
+
+The purpose of pcworx-info.nse is to identify and enumerate Phoenix Contact ILC PLCs via the PC Worx protocol. A  PLC is positively identified by querying TCP/1962 with pre-generated requests. The response messages will determine if it is a PC Worx capable PLC and lead to additional enumeration. 
+
+In total three packets will be sent to the PLC with this script to build up the communications and then to request the information from the PLC.
+
+PC Worx properties parsed by this script are:
+
+1. PLC Type - A string that represents the ILC PLC Type.
+
+2. Model Number -  A string of ASCII numbers that represents the Model of the PLC Such as a [2737193](https://www.phoenixcontact.com/online/portal/us?urile=pxc-oc-itemdetail:pid=2737193).
+
+3. Firmware Version - A string that represents the Firmware version running on the PLC.
+
+4. Firmware Date - A string that represents the build date of the Firmware running on the PLC.
+
+5. Firmware Time - A string that represents the build time of the Firmware running on the PLC.
+
+####History and Background
+
+From Phoenix Contact product webpage [Link](https://www.phoenixcontact.com/online/portal/us?1dmy&urile=wcm:path:/usen/web/main/products/subcategory_pages/programming_p-19-05/8b777145-e7f2-4eaa-ae5e-4dacdce30223/8b777145-e7f2-4eaa-ae5e-4dacdce30223)
+
+> PC Worx is the consistent engineering software for all controllers from Phoenix Contact. It combines programming - according to IEC 61131, fieldbus configuration and system diagnostics – in a single software solution. This provides optimum interaction between hardware and software. PC Worx can be used to implement complex automation concepts. Depending on the number of I/Os to be supported, you have two versions to choose from: PC WORX BASIC and PC WORX PRO. 
+	
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading pcworx-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move pcworx-info.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading pcworx-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv pcworx-info.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for Phoenix Contact PLCs.
+
+	Windows: nmap -p 1962 --script pcworx-info -sV <host>
+	
+	Linux: nmap -p 1962 --script pcworx-info -sV <host> 
+
+		
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/pcworx-info.nse
+
+This script uses the standard PC Worx destination port of TCP 1962. 
+==
+
+###proconos-info.nse
+![proconos-info Sample Output] (http://www.digitalbond.com/wp-content/uploads/2015/02/pcworx.png)
+
+####Author
+
+Stephen Hilt  
+[Digital Bond, Inc](http://www.digitalbond.com)
+
+
+####Purpose and Description
+
+The purpose of proconos-info.nse is to identify and enumerate PLCs via the ProConOS/MultiProg protocol. A  PLC is positively identified by querying TCP/20547 with pre-generated requests. The response messages will determine if it is a ProConOS/MultiProg Capbable PLC and lead to additional enumeration. 
+
+Only one request is required to query this information from the PLC.
+
+ProConOS/MultiProg properties parsed by this script are:
+
+1. Ladder Logic Runtime - A string that displayes the Runtime Name, Verison and Build Date.
+
+2. PLC Type -  A string of that represents the Type of the PLC, and Firmware Version
+
+3. Project Name - A string that represents the project name that is currently running on the PLC.
+
+4. Boot Project - A string that represents the project name set to boot on the PLC.
+
+5. Project Source Code - A string that represents if the source code for the project is available or not.
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions. 
+	http://nmap.org/download.html
+
+#####Windows
+
+After downloading proconos-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+	move proconos-info.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading proconos-info.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+		
+	sudo mv proconos-info.nse /usr/share/nmap/scripts
+		
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for ProConOS/MultiProg PLCs.
+
+	Windows: nmap -p 20547 --script proconos-info -sV <host>
+	
+	Linux: nmap -p 20547 --script proconos-info -sV <host> 
+
+		
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/proconos-info.nse
+
+This script uses the standard ProConOS/MultiProg destination port of TCP 20547. 
+==
 ###s7-enumerate.nse
 ![s7-enumerate Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2014/04/S7screenshot.png)
 
