@@ -15,7 +15,15 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
 
+* [fox-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#fox-infonse) - Identify and enumerate Niagara Fox devices
+
 * [modicon-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#modicon-infonse) - Identify and enumerate Schneider Electric Modicon PLCs
+
+* [omron-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#omron-infonse) - Identify and enumerate Omron PLCs
+
+* [pcworx-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#pcworx-infonse) - Identify and enumerate PC Worx Protocol enabled PLCs
+
+* [proconos-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#pcworx-infonse) - Identify and enumerate ProConOS enabled PLCs
  
 * [s7-enumerate.nse](https://github.com/digitalbond/Redpoint#s7-enumeratense) - Identify and enumerate Siemens SIMATIC S7 PLCs
 
@@ -503,6 +511,7 @@ Inside a Terminal Window/Command Prompt use one of the following commands where 
 The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/pcworx-info.nse
 
 This script uses the standard PC Worx destination port of TCP 1962. 
+
 ==
 
 ###proconos-info.nse
