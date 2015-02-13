@@ -41,7 +41,7 @@ categories = {"discovery", "version"}
 -- Function to define the portrule as per nmap standards
 --
 --
-portrule = shortport.portnumber({1962,20547}, "tcp")
+portrule = shortport.portnumber(20547, "tcp")
 
 ---
 --  Function to set the nmap output for the host, if a valid PCPROTOCOL packet
