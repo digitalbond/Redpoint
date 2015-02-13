@@ -16,7 +16,7 @@ http://digitalbond.com
 ]]
 ---
 -- @usage
--- nmap --script pcworx-info -sU  -p 1962 <host>
+-- nmap --script pcworx-info -p 1962 <host>
 --
 --
 -- @output
