@@ -15,7 +15,7 @@ http://digitalbond.com
 ]]
 ---
 -- @usage
--- nmap --script proconos-info -sU  -p 20547 <host>
+-- nmap --script proconos-info -p 20547 <host>
 --
 --
 -- @output
