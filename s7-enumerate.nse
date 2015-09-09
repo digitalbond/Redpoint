@@ -1,6 +1,3 @@
---
--- required packages for this script
---
 local bin = require "bin"
 local nmap = require "nmap"
 local shortport = require "shortport"
@@ -11,10 +8,10 @@ local table = require "table"
 
 description = [[
 Enumerates Siemens S7 PLC Devices and collects their device information. This
-NSE is based off PLCScan that was developed by Positive Research and
+script is based off PLCScan that was developed by Positive Research and
 Scadastrangelove (https://code.google.com/p/plcscan/). This script is meant to
 provide the same functionality as PLCScan inside of Nmap. Some of the
-information that is collected by PLCScan was not ported over to this NSE, this
+information that is collected by PLCScan was not ported over; this
 information can be parsed out of the packets that are received.
 
 Thanks to Positive Research, and Dmitry Efanov for creating PLCScan
@@ -22,15 +19,15 @@ Thanks to Positive Research, and Dmitry Efanov for creating PLCScan
 
 author = "Stephen Hilt (Digital Bond)"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
-categories = {"discovery","intrusive"}
+categories = {"discovery", "intrusive"}
 
 ---
 -- @usage
--- nmap -sP --script s7-discover.nse -p 102 <host/s>
+-- nmap --script s7-info.nse -p 102 <host/s>
 --
 -- @output
---102/tcp open  Siemens S7 315 PLC
---| s7-discover:
+--102/tcp open  Siemens S7 PLC
+--| s7-info:
 --|   Basic Hardware: 6ES7 315-2AG10-0AB0
 --|   System Name: SIMATIC 300(1)
 --|   Copyright: Original Siemens Equipment
@@ -64,13 +61,13 @@ portrule = shortport.port_or_service(102, "iso-tsap", "tcp")
 -- inside of the main action.
 -- @param socket the socket that was created in Action.
 -- @param query the specific query that you want to send/receive on.
-function send_receive(socket, query)
+local function send_receive(socket, query)
   local sendstatus, senderr = socket:send(query)
   if(sendstatus == false) then
     return "Error Sending S7COMM"
   end
   -- receive response
-  local rcvstatus,response = socket:receive()
+  local rcvstatus, response = socket:receive()
   if(rcvstatus == false) then
     return "Error Reading S7COMM"
   end
@@ -88,7 +85,7 @@ end
 -- @param host The host hat was passed in via Nmap, this is to change output of host/port
 -- @param port The port that was passed in via Nmap, this is to change output of host/port
 -- @param output Table used for output for return to Nmap
-function parse_response(response, host, port, output)
+local function parse_response(response, host, port, output)
   -- unpack the protocol ID
   local pos, value = bin.unpack("C", response, 8)
   -- unpack the second byte of the SZL-ID
@@ -105,7 +102,7 @@ function parse_response(response, host, port, output)
     -- set version number to 0
     local version = 0
     -- parse version number
-    local pos, char1,char2,char3 = bin.unpack("CCC", response, 123)
+    local pos, char1, char2, char3 = bin.unpack("CCC", response, 123)
     -- concatenate string, or if string is nil make version number 0.0
     output["Version"] = table.concat({char1 or "0.0", char2, char3}, ".")
     -- return the output table
@@ -124,7 +121,7 @@ end
 -- inside of the main action.
 -- @param response Packet response that was received from S7 host.
 -- @param output Table used for output for return to Nmap
-function second_parse_response(response, output)
+local function second_parse_response(response, output)
   local offset = 0
   -- unpack the protocol ID
   local pos, value = bin.unpack("C", response, 8)
@@ -134,7 +131,7 @@ function second_parse_response(response, output)
   if (value == 0x32) then
     -- if the szl-ID is not 0x1c
     if( szl_id ~= 0x1c ) then
-      -- change offset to 4, this is where most ov valid PLCs will fall
+      -- change offset to 4, this is where most of valid PLCs will fall
       offset = 4
     end
     -- parse system name
@@ -149,7 +146,7 @@ function second_parse_response(response, output)
     pos, output["Copyright"] = bin.unpack("z", response, 142 + offset)
 
     -- for each element in the table, if it is nil, then remove the information from the table
-    for key,value in pairs(output) do
+    for key, value in pairs(output) do
       if(string.len(output[key]) == 0) then
         output[key] = nil
       end
@@ -167,7 +164,7 @@ end
 --
 -- @param host Host that was passed in via nmap
 -- @param port port that S7COMM is running on
-function set_nmap(host, port)
+local function set_nmap(host, port)
   --set port Open
   port.state = "open"
   -- set that detected an Siemens S7
@@ -185,19 +182,19 @@ end
 --
 -- @param host Host that was scanned via nmap
 -- @param port port that was scanned via nmap
-action = function(host,port)
+action = function(host, port)
   -- COTP packet with a dst of 102
-  local COTP = bin.pack("H","0300001611e00000001400c1020100c2020" .. "102" .. "c0010a")
+local COTP = bin.pack("H", "0300001611e00000001400c1020100c2020" .. "102" .. "c0010a")
   -- COTP packet with a dst of 200
-  local alt_COTP = bin.pack("H","0300001611e00000000500c1020100c2020" .. "200" .. "c0010a")
+  local alt_COTP = bin.pack("H", "0300001611e00000000500c1020100c2020" .. "200" .. "c0010a")
   -- setup the ROSCTR Packet
-  local ROSCTR_Setup = bin.pack("H","0300001902f08032010000000000080000f0000001000101e0")
+  local ROSCTR_Setup = bin.pack("H", "0300001902f08032010000000000080000f0000001000101e0")
   -- setup the Read SZL information packet
-  local Read_SZL = bin.pack("H","0300002102f080320700000000000800080001120411440100ff09000400110001")
+  local Read_SZL = bin.pack("H", "0300002102f080320700000000000800080001120411440100ff09000400110001")
   -- setup the first SZL request (gather the basic hardware and version number)
-  local first_SZL_Request = bin.pack("H","0300002102f080320700000000000800080001120411440100ff09000400110001")
+  local first_SZL_Request = bin.pack("H", "0300002102f080320700000000000800080001120411440100ff09000400110001")
   -- setup the second SZL request
-  local second_SZL_Request = bin.pack("H","0300002102f080320700000000000800080001120411440100ff090004001c0001")
+  local second_SZL_Request = bin.pack("H", "0300002102f080320700000000000800080001120411440100ff090004001c0001")
   -- response is used to collect the packet responses
   local response
   -- output table for Nmap
@@ -205,11 +202,9 @@ action = function(host,port)
   -- create socket for communications
   local sock = nmap.new_socket()
   -- connect to host
-  local constatus,conerr = sock:connect(host,port)
+  local constatus, conerr = sock:connect(host, port)
   if not constatus then
-    stdnse.print_debug(1,
-      'Error establishing connection for %s - %s', host,conerr
-      )
+    stdnse.debug1('Error establishing connection for %s - %s', host, conerr)
     return nil
   end
   -- send and receive the COTP Packet
@@ -218,7 +213,22 @@ action = function(host,port)
   local pos, CC_connect_confirm = bin.unpack("C", response, 6)
   -- if PDU type is not 0xd0, then not a successful COTP connection
   if ( CC_connect_confirm ~= 0xd0) then
-    return nil
+    sock:close()
+    -- create socket for communications
+    stdnse.debug1('S7INFO:: CREATING NEW SOCKET')
+    sock = nmap.new_socket()
+    -- connect to host
+    local constatus, conerr = sock:connect(host, port)
+    if not constatus then
+      stdnse.debug1('Error establishing connection for %s - %s', host, conerr)
+      return nil
+    end
+    response = send_receive(sock, alt_COTP)
+    local pos, CC_connect_confirm = bin.unpack("C", response, 6)
+    if ( CC_connect_confirm ~= 0xd0) then
+      stdnse.debug1('S7 INFO:: Could not negotiate COTP')
+      return nil
+    end
   end
   -- send and receive the ROSCTR Setup Packet
   response  = send_receive(sock, ROSCTR_Setup)
@@ -243,51 +253,9 @@ action = function(host,port)
   response = send_receive(sock, second_SZL_Request)
   -- parse the response for more information
   output = second_parse_response(response, output)
-  -- if nothing was parsed from the previous two responses
-  if(output == nil) then
-    -- re initialize the table
-    output = stdnse.output_table()
-    -- re connect to the device ( a RST packet was sent in the previous attempts)
-    local constatus,conerr = sock:connect(host,port)
-    if not constatus then
-      stdnse.print_debug(1,
-        'Error establishing connection for %s - %s', host,conerr
-        )
-      return nil
-    end
-    -- send and receive the alternate COTP Packet, the dst is 200 instead of 102( do nothing with result)
-    response  = send_receive(sock, alt_COTP)
-    local pos, CC_connect_confirm = bin.unpack("C", response, 6)
-    -- if PDU type is not 0xd0, then not a successful COTP connection
-    if ( CC_connect_confirm ~= 0xd0) then
-      stdnse.print_debug(1, "Not a successful COTP Packet")
-      return nil
-    end
-    -- send and receive the packets as before.
-    response  = send_receive(sock, ROSCTR_Setup)
-    -- unpack the protocol ID
-    local pos, protocol_id = bin.unpack("C", response, 8)
-    -- if protocol ID is not 0x32 then return nil
-    if ( protocol_id ~= 0x32) then
-      stdnse.print_debug(1, "Not a successful S7COMM Packet")
-      return nil
-    end
-    response  = send_receive(sock, Read_SZL)
-    -- unpack the protocol ID
-    local pos, protocol_id = bin.unpack("C", response, 8)
-    -- if protocol ID is not 0x32 then return nil
-    if ( protocol_id ~= 0x32) then
-      stdnse.print_debug(1, "Not a successful S7COMM Packet")
-      return nil
-    end
-    response  = send_receive(sock, first_SZL_Request)
-    output = parse_response(response, host, port, "ONE", output)
-    response = send_receive(sock, second_SZL_Request)
-    output = parse_response(response, host, port, "TWO", output)
-  end
   -- close the socket
   sock:close()
-  
+
   -- If we parsed anything, then set the version info for Nmap
   if #output > 0 then
     set_nmap(host, port)
@@ -296,4 +264,3 @@ action = function(host,port)
   return output
 
 end
-
