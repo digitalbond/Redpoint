@@ -184,7 +184,7 @@ end
 -- @param port port that was scanned via nmap
 action = function(host, port)
   -- COTP packet with a dst of 102
-local COTP = bin.pack("H", "0300001611e00000001400c1020100c2020" .. "102" .. "c0010a")
+  local COTP = bin.pack("H", "0300001611e00000001400c1020100c2020" .. "102" .. "c0010a")
   -- COTP packet with a dst of 200
   local alt_COTP = bin.pack("H", "0300001611e00000000500c1020100c2020" .. "200" .. "c0010a")
   -- setup the ROSCTR Packet
