@@ -136,8 +136,8 @@ This script does not attempt to join a BACnet network as a foreign device, it si
 
 ####Authors
 
-Stephen Hilt
-K. Reid Wightman
+Stephen Hilt,
+Reid Wightman
 
 ####Purpose and Description
 
