@@ -13,6 +13,8 @@ Each script is documented below and available in a .nse file in this repository.
 
 * [BACnet-discover-enumerate.nse](https://github.com/digitalbond/Redpoint#bacnet-discover-enumeratense) - Identify and enumerate BACnet devices
 
+* [codesys-v2-discover.nse](http://github.com/digitalbond/Redpoint#codesys-v2-discovernse) - Identify and enumerate CoDeSys V2 controllers
+
 * [enip-enumerate.nse](https://github.com/digitalbond/Redpoint#enip-enumeratense) - Identify and enumerate EtherNet/IP devices from Rockwell Automation and other vendors
 
 * [fox-info.nse](https://github.com/digitalbond/Redpoint/blob/master/README.md#fox-infonse) - Identify and enumerate Niagara Fox devices
@@ -127,6 +129,61 @@ This script uses the standard BACnet source and destination port of UDP 47808.
 Newer (after February 25, 2004) BACnet devices are required by spec to respond to specific requests that use a 'catchall' object-identifier with their own valid instance number (see ANSI/ASHRAE Addendum a to ANSI/ASHRAE Standard 135-2001).  Older versions of BACnet devices may not respond to this catchall, and will respond with a BACnet error packet instead.
 
 This script does not attempt to join a BACnet network as a foreign device, it simply sends BACnet requests directly to an IP addressable device.
+
+==
+###codesys-v2-discover.nse
+![codesys-v2-discover Sample Output] (http://digibond.wpengine.netdna-cdn.com/wp-content/uploads/2016/03/codesys-v2-discover-win.png)
+
+####Authors
+
+Stephen Hilt
+K. Reid Wightman
+
+####Purpose and Description
+
+The codesys-v2-discover.nse script identifies PLCs which run the version 2 ladder logic runtime made by 3S-Software GmbH.  These controllers speak a proprieaty binary protocol for installing new ladder logic, as well as debugging the running ladder logic.  The protocol can require authentication.  In practice, few devices support this behavior.  This script does not test for authentication.
+
+This script sends a simple request for identification to the device. The response message may include the operating system and specific point release of CoDeSys running on the PLC.
+
+####History and Background
+
+Digital Bond released details of the CoDeSys runtime system being insecure-by-design in April 2012. The protocol usually uses TCP/1200 or TCP/2455 as its control port.  The control protocol contains functions to upload and download files from the controllers.  The protocol also may provide a command shell, which offers additional functionality.  Shell features typically include the ability to start and stop the currently-running ladder logic, as well as retrieve debugging information from the controller.
+
+The initial advisory applied only to version 2 of the runtime. Digital Bond also released a proof-of-concept Nmap script, originally written by HD Moore as part of his internet-scanning project.
+
+A Nessus script was also produced for this version of the protocol, however the Nessus script contains an error and does not properly check for controllers with big-endian CPUs.
+
+####Installation
+
+This script requires Nmap to run. If you do not have Nmap download and Install Nmap based off the Nmap instructions.
+        http://nmap.org/download.html
+
+#####Windows
+
+After downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as an administrator.  Go to Start -> Programs -> Accessories, and right click on 'Command Prompt'.  Select 'Run as Administrator'.
+
+        move codesys-v2-discover.nse C:\Program Files (x86)\Nmap\scripts
+
+#####Linux
+
+After Downloading enip-enumerate.nse you'll need to move it into the NSE Scripts directory, this will have to be done as sudo/root.
+
+        sudo mv codesys-v2-discover.nse /usr/share/nmap/scripts
+
+####Usage
+
+Inside a Terminal Window/Command Prompt use one of the following commands where <host> is the target you wish you scan for EtherNet/IP.
+
+        Windows: nmap -p 1200,2455 --script codesys-v2-discover <host>
+	
+        Linux: sudo nmap -p 1200,2455 --script codesys-v2-discover <host>
+
+
+####Notes
+
+The official version of this script is maintained at:https://github.com/digitalbond/Redpoint/codesys-v2-discover.nse
+
+This script will attempt to send the CoDeSys requests on any open port. While the standard ports of 1200 or 2455 are used by most controllers, some controllers use alternate ports such as 1201, 1217, and yet other ports.
 
 ==
 ###enip-enumerate.nse
