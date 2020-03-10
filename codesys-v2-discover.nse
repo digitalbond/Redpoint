@@ -3,6 +3,7 @@ local comm   = require "comm"
 local stdnse = require "stdnse"
 local strbuf = require "strbuf"
 local nsedebug = require "nsedebug"
+local bin = require "bin"
 
 description = [[
 
